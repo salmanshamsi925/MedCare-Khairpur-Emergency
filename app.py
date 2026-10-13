@@ -552,6 +552,23 @@ def doctor_update_status():
     flash('Your status updated.', 'success')
     return redirect(url_for('doctor_dashboard'))
 
+@app.route('/doctor/discharge-patient', methods=['POST'])
+@login_required(role='doctor')
+def doctor_discharge_patient():
+    case_id = request.form.get('case_id')
+    if case_id:
+        c = Case.query.get(int(case_id))
+        if c and c.assigned_doctor_id == session['user_id']:
+            if c.assigned_bed_id:
+                bed = Bed.query.get(c.assigned_bed_id)
+                if bed:
+                    bed.status = 'Available'
+                    bed.assigned_case_id = None
+            c.status = 'Closed'
+            db.session.commit()
+            flash(f'Patient {c.patient_name} ({c.case_code}) marked as treated / discharged.', 'success')
+    return redirect(url_for('doctor_dashboard'))
+
 # ---------- AMBULANCE MODULE ----------
 
 @app.route('/ambulance')
