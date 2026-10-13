@@ -108,23 +108,7 @@
 
 {% block body %}
 <header>
-  <!-- Top bar: on mobile show ONLY the phone number -->
-  <div class="header-top">
-    <div class="container">
-      <div class="row align-items-center">
-        <div class="col-7 col-lg-7">
-          <span class="ht-question d-none d-md-inline"><i class="bi bi-question-circle me-1"></i> Need help? We are 24/7 available</span>
-          <a href="tel:+923001234567" class="ht-phone-mobile d-md-none"><i class="bi bi-telephone-fill me-1"></i> +92 300 1234567</a>
-        </div>
-        <div class="col-5 col-lg-5 text-end">
-          <span class="ht-phone d-none d-md-inline"><i class="bi bi-telephone me-1"></i> +92 300 1234567</span>
-          <span class="ht-emergency d-none d-md-inline"><i class="bi bi-telephone-fill me-1"></i> THE Emergency Contacts</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Desktop: logo + nav (sticky) -->
+  <!-- Desktop: logo + nav (sticky on top) -->
   <div class="header-logo-menu sticker">
     <div class="container">
       <div class="row align-items-center">
@@ -141,7 +125,8 @@
               <ul id="nav">
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('request_help') }}">Emergency</a></li>
-                <li><a href="{{ url_for('request_help') }}" class="nav-ambulance">Ambulance</a></li>
+                <li><a href="{{ url_for('request_help') }}" class="nav-ambulance"><span>🚑</span> Ambulance</a></li>
+                <li><a href="{{ url_for('login') }}" class="nav-login"><i class="bi bi-shield-lock-fill me-1"></i> Admin Login</a></li>
               </ul>
             </nav>
           </div>
@@ -166,6 +151,22 @@
     </div>
   </div>
 
+  <!-- Emergency Contacts strip below Navbar -->
+  <div class="header-top">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-7 col-lg-7">
+          <span class="ht-question d-none d-md-inline"><i class="bi bi-question-circle me-1"></i> Need help? We are 24/7 available</span>
+          <a href="tel:+923001234567" class="ht-phone-mobile d-md-none"><i class="bi bi-telephone-fill me-1"></i> +92 300 1234567</a>
+        </div>
+        <div class="col-5 col-lg-5 text-end">
+          <span class="ht-phone d-none d-md-inline"><i class="bi bi-telephone me-1"></i> +92 300 1234567</span>
+          <span class="ht-emergency d-none d-md-inline"><i class="bi bi-telephone-fill me-1"></i> THE Emergency Contacts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Mobile slide-out sidebar -->
   <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
   <aside class="mobile-sidebar" id="mobileSidebar">
@@ -177,7 +178,8 @@
       <ul>
         <li><a href="{{ url_for('index') }}"><i class="bi bi-house-door me-2"></i> Home</a></li>
         <li><a href="{{ url_for('request_help') }}"><i class="bi bi-exclamation-triangle me-2"></i> Emergency</a></li>
-        <li><a href="{{ url_for('request_help') }}"><i class="bi bi-ambulance me-2"></i> Ambulance</a></li>
+        <li><a href="{{ url_for('request_help') }}"><span class="me-2">🚑</span> Ambulance</a></li>
+        <li><a href="{{ url_for('login') }}"><i class="bi bi-shield-lock-fill me-2"></i> Admin Login</a></li>
       </ul>
     </nav>
   </aside>
@@ -289,7 +291,7 @@
 
       <div class="content-card mb-3">
         <div class="track-card-header">
-          <div class="track-card-icon"><i class="bi bi-ambulance"></i></div>
+          <div class="track-card-icon" style="font-size: 1.45rem; line-height: 1;">🚑</div>
           <div>
             <h5>Ambulance</h5>
             <p>Unit &amp; live status</p>
@@ -297,7 +299,7 @@
         </div>
         <div class="card-body" style="padding: 10px 20px;">
           <div class="detail-row">
-            <div class="detail-ico" style="background:#fdecea;color:#e53935;"><i class="bi bi-truck"></i></div>
+            <div class="detail-ico" style="background:#fdecea; font-size: 1.15rem; line-height: 1;">🚑</div>
             <div><span class="dl">Unit</span><span class="dv" id="ambUnit">Assigning…</span></div>
           </div>
           <div class="detail-row">

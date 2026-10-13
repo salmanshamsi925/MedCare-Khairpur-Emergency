@@ -1,224 +1,406 @@
 {% extends "base.html" %}
-{% block title %}Track Ambulances - MedCare Khairpur{% endblock %}
+{% block title %}Live Fleet Radar - MedCare Khairpur{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  /* ================= FLEET TRACKING (SMART & CLEAN) ================= */
+  :root {
+    --adm-navy: #1F3971;
+    --adm-navy-dark: #122448;
+    --adm-red: #e53935;
+    --adm-yellow: #FFAE27;
+    --adm-green: #10b981;
+    --adm-border: #e2e8f0;
+    --adm-bg: #f6f8fc;
+  }
+
+  body {
+    background-color: var(--adm-bg);
+  }
+
+  /* ===== Card Shells & Headers ===== */
+  .content-card {
+    background: #ffffff;
+    border: 1px solid var(--adm-border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.05);
+  }
   .admin-card-header {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; padding: 18px 22px;
-    background: linear-gradient(120deg, var(--navy), var(--navy-light));
-    color: #fff; border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 20px;
+    background: linear-gradient(135deg, #102146 0%, #1F3971 70%, #294c96 100%);
+    color: #fff;
   }
   .admin-card-header-left {
-    display: flex; align-items: center; gap: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
   .admin-card-icon {
-    width: 42px; height: 42px; border-radius: 10px;
-    background: rgba(255,174,39,0.22); color: var(--yellow);
-    display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba(255, 174, 39, 0.16);
+    border: 1px solid rgba(255, 174, 39, 0.35);
+    color: #FFAE27;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
   }
   .admin-card-header h5 {
-    margin: 0; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: #fff;
   }
   .admin-card-header p {
-    margin: 2px 0 0; font-size: 0.78rem; color: rgba(255,255,255,0.78);
-  }
-  
-  .content-card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(15,30,50,0.06);
+    margin: 2px 0 0;
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.75);
   }
 
-  .live-badge {
-    background: var(--red); color: #fff; font-size: 0.72rem; font-weight: 700;
-    padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px;
-    display: inline-flex; align-items: center; gap: 5px;
+  /* Executive Topbar */
+  .executive-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--adm-border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
   }
-  .live-dot {
-    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-    background: #fff; animation: livePulse 1.5s infinite;
+  .topbar-left { display: flex; flex-direction: column; gap: 3px; }
+  .topbar-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .topbar-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #102146;
+    margin: 0;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .topbar-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .live-dot-pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #dc2626;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.35);
+    animation: beaconPulse 1.4s infinite;
+  }
+  @keyframes beaconPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.5; }
+  }
+  .topbar-sub { font-size: 0.8rem; color: #64748b; margin: 0; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .btn-topbar-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 15px;
+    border-radius: 9px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.22s ease;
+    cursor: pointer;
+  }
+  .btn-radar {
+    background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 14px rgba(229, 57, 53, 0.25);
+  }
+  .btn-radar:hover { color: #ffffff; transform: translateY(-1px); }
+  .btn-secondary-action {
+    background: #ffffff;
+    color: #1F3971;
+    border: 1.5px solid var(--adm-border);
+  }
+  .btn-secondary-action:hover { background: #f8fafc; color: #1F3971; transform: translateY(-1px); }
 
-  /* Equal-Height Map & Table Containers */
-  .fleet-workspace-row {
-    min-height: 540px;
+  .dashboard-main-content {
+    padding: 18px 24px 32px;
+    flex: 1;
   }
+
+  /* Telemetry KPI Ribbon */
+  .readiness-pill {
+    background: #ffffff;
+    border: 1px solid var(--adm-border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 140px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+  }
+  .readiness-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+  }
+  .readiness-val { font-size: 1.15rem; font-weight: 800; color: #102146; line-height: 1; }
+  .readiness-label { font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+
+  /* Map Container */
   .map-container-box {
-    height: 540px;
+    height: 580px;
     width: 100%;
     position: relative;
+    border-radius: 0 0 14px 14px;
+    overflow: hidden;
   }
   #fleetMap {
     height: 100%;
     width: 100%;
-    border-radius: 0 0 12px 12px;
     z-index: 1;
   }
 
-  /* Right Fleet Table: STRICTLY NO HORIZONTAL SCROLL */
-  .table-container-box {
-    height: 540px;
+  /* Custom Map Markers & Radar Rings */
+  .radar-marker-wrap {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .radar-marker-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(229, 57, 53, 0.35);
+    animation: radarRipple 1.8s infinite;
+  }
+  @keyframes radarRipple {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  .radar-marker-core {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e53935;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 3px 10px rgba(229, 57, 53, 0.5);
+    z-index: 2;
+  }
+  .radar-marker-ready {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #10b981;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.4);
+  }
+  .radar-marker-patient {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.5);
+  }
+  .radar-marker-hospital {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #1e3a8a;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 3px 8px rgba(30, 58, 138, 0.4);
+  }
+
+  /* Right Side Telemetry Feed */
+  .telemetry-container {
+    height: 580px;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
   }
-  .fleet-scroll-area {
-    flex: 1 1 auto;
+  .telemetry-scroll-area {
+    flex: 1;
     overflow-y: auto;
-    overflow-x: hidden !important;
-    max-height: 540px;
+    padding: 14px;
+    background: #f8fafc;
   }
-  .fleet-scroll-area::-webkit-scrollbar {
+  .telemetry-scroll-area::-webkit-scrollbar {
     width: 5px;
-    height: 0px !important;
   }
-  .fleet-scroll-area::-webkit-scrollbar-thumb {
+  .telemetry-scroll-area::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 4px;
   }
-  .fleet-scroll-area::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+
+  /* Active Emergency Mission Card */
+  .emergency-card {
+    background: #ffffff;
+    border: 1.5px solid #fecaca;
+    border-left: 4px solid #dc2626;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.08);
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .emergency-card:hover {
+    border-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+  }
+  .emergency-card.selected-mission {
+    background: #fff5f5;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
   }
 
-  /* Fixed 100% width table */
-  .fleet-smart-table {
-    width: 100% !important;
-    table-layout: fixed !important;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin-bottom: 0;
-  }
-  .fleet-smart-table thead th {
-    background: #f8fafc;
-    color: var(--navy);
-    font-size: 0.74rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 12px 10px;
-    border-bottom: 1px solid var(--border) !important;
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    white-space: nowrap;
-  }
-  .fleet-smart-table tbody tr {
+  /* Standby Unit Pill */
+  .standby-item {
+    background: #ffffff;
+    border: 1px solid var(--adm-border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.15s ease;
     cursor: pointer;
-    transition: background-color 0.15s ease;
   }
-  .fleet-smart-table tbody tr:hover {
-    background-color: #f1f5f9 !important;
+  .standby-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
   }
-  .fleet-smart-table tbody tr.active-unit {
-    background-color: #e8eefb !important;
+
+  /* Unit Tags */
+  .unit-code-tag {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-weight: 700;
+    color: var(--adm-navy);
+    font-size: 0.84rem;
   }
-  .fleet-smart-table tbody td {
-    padding: 11px 10px;
-    vertical-align: middle;
-    border-bottom: 1px solid #f1f5f9;
-    font-size: 0.85rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .unit-tier-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #dbeafe;
   }
 
   /* Status Badges */
   .badge-status-ready {
-    background: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
     font-weight: 600;
-    font-size: 0.74rem;
-    padding: 3px 8px;
-    border-radius: 14px;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 12px;
     display: inline-flex;
     align-items: center;
     gap: 4px;
   }
   .badge-status-onway {
-    background: #fdecea;
-    color: #e53935;
-    border: 1px solid #ffcdd2;
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
     font-weight: 700;
-    font-size: 0.74rem;
-    padding: 3px 8px;
-    border-radius: 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .badge-status-busy {
-    background: #fff4dd;
-    color: #b97c00;
-    border: 1px solid #ffe0b2;
-    font-weight: 600;
-    font-size: 0.74rem;
-    padding: 3px 8px;
-    border-radius: 14px;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 12px;
     display: inline-flex;
     align-items: center;
     gap: 4px;
   }
 
-  /* Unit Badge */
-  .unit-code-tag {
-    font-family: 'JetBrains Mono', Consolas, monospace;
-    font-weight: 700;
-    color: var(--navy);
-    font-size: 0.85rem;
-  }
-  .unit-sub-type {
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: #64748b;
-    background: #f1f5f9;
-    padding: 1px 5px;
+  /* Mission Progress Bar */
+  .dispatch-progress {
+    height: 5px;
     border-radius: 4px;
-    margin-left: 3px;
+    background: #f1f5f9;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .dispatch-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #e53935 0%, #10b981 100%);
+    border-radius: 4px;
+    transition: width 0.6s ease;
   }
 
-  /* ETA & Case labels */
-  .eta-tag {
-    color: #e53935;
-    font-weight: 600;
-    font-size: 0.78rem;
-  }
-  .arrived-tag {
-    color: #2e7d32;
-    font-weight: 600;
-    font-size: 0.78rem;
-  }
-
-  /* Popups */
-  .amb-popup { font-size: 0.85rem; line-height: 1.5; padding: 2px; }
-
-  /* Map pins */
-  .fleet-marker-icon {
-    width: 30px; height: 30px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; font-size: 13px; border: 2px solid #fff;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-  }
-  .fmarker-ready { background: #2e7d32; }
-  .fmarker-onway { background: #e53935; animation: livePulse 1.8s infinite; }
-  .fmarker-busy  { background: #b97c00; }
-
-  /* Clean sticky footer */
   .site-footer {
     margin-top: auto !important;
     margin-bottom: 0 !important;
+    padding: 16px 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    border-top: 1px solid var(--adm-border);
+    background: #ffffff;
   }
 
   @media (max-width: 991px) {
-    .map-container-box, .table-container-box { height: 420px; }
-    .fleet-scroll-area { max-height: 420px; }
+    .executive-topbar { padding: 12px 16px; }
+    .dashboard-main-content { padding: 14px 16px 28px; }
+    .topbar-right { width: 100%; }
+    .btn-topbar-action { flex: 1; justify-content: center; }
+    .map-container-box, .telemetry-container { height: 420px; }
   }
 </style>
 {% endblock %}
@@ -226,99 +408,170 @@
 {% block body %}
 {% include 'admin/_nav.html' %}
 
-<!-- ================= CLEAN ADMIN HERO ================= -->
-<div class="about-hero-area about-hero-small">
-  <div class="about-hero-bg"></div>
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-lg-8 col-md-12">
-        <div class="about-hero-content">
-          <h2 class="about-hero-title" style="font-size: 32px; margin-bottom: 8px;">
-            <i class="bi bi-broadcast me-2"></i>Live Ambulance Tracking
-          </h2>
-          <p class="about-hero-text" style="margin-bottom: 0;">
-            Watch the whole 10-unit fleet move in real time across Khairpur ·
-            <span class="live-badge"><span class="live-dot"></span>LIVE</span>
-          </p>
+<!-- ================= EXECUTIVE TOPBAR ================= -->
+<header class="executive-topbar">
+  <div class="topbar-left">
+    <div class="topbar-title-row">
+      <h1 class="topbar-title">
+        <i class="bi bi-broadcast text-danger"></i>
+        <span>Live Ambulance Fleet Radar</span>
+      </h1>
+      <span class="topbar-status-chip">
+        <span class="live-dot-pulse"></span>
+        <span id="activeRadarChip">Telemetry Active</span>
+      </span>
+    </div>
+    <p class="topbar-sub">
+      Live GPS tracking, emergency route navigation, and real-time patient transit telemetry across Khairpur
+    </p>
+  </div>
+  <div class="topbar-right">
+    <button type="button" class="btn-topbar-action btn-secondary-action" onclick="recenterMap()">
+      <i class="bi bi-crosshair text-primary"></i>
+      <span>Recenter Map</span>
+    </button>
+    <a href="{{ url_for('admin_allocate') }}" class="btn-topbar-action btn-radar">
+      <i class="bi bi-magic text-warning"></i>
+      <span>Smart Allocate</span>
+    </a>
+  </div>
+</header>
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="dashboard-main-content">
+  
+  <!-- 1. Telemetry Readiness Ribbon -->
+  <div class="row g-2 mb-3">
+    <div class="col-6 col-md-3">
+      <div class="readiness-pill">
+        <div class="readiness-icon" style="background:#fef2f2;color:#dc2626;">
+          <i class="bi bi-broadcast-pin"></i>
+        </div>
+        <div>
+          <div class="readiness-val" id="kpiActiveCount">0</div>
+          <div class="readiness-label">Active Dispatches</div>
         </div>
       </div>
-      <div class="col-lg-4 d-none d-lg-block text-end">
-        <button class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-semibold" onclick="recenterMap()">
-          <i class="bi bi-crosshair me-1"></i> Recenter Map
-        </button>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="readiness-pill">
+        <div class="readiness-icon" style="background:#f0fdf4;color:#16a34a;">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div>
+          <div class="readiness-val" id="kpiReadyCount">10</div>
+          <div class="readiness-label">Standby at Base</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="readiness-pill">
+        <div class="readiness-icon" style="background:#eff6ff;color:#2563eb;">
+          <i class="bi bi-clock-history"></i>
+        </div>
+        <div>
+          <div class="readiness-val" id="kpiFastestEta">—</div>
+          <div class="readiness-label">Fastest ETA</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="readiness-pill">
+        <div class="readiness-icon" style="background:#fff7ed;color:#ea580c;">
+          <i class="bi bi-compass"></i>
+        </div>
+        <div>
+          <div class="readiness-val">20 km</div>
+          <div class="readiness-label">Khairpur Hub Radius</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ================= CONTENT (SMART & BALANCED) ================= -->
-<div class="container section-padding" style="padding-top: 28px; padding-bottom: 45px;">
-  <div class="row g-3 fleet-workspace-row">
+  <div class="row g-3">
     
-    <!-- Fleet Map (7 Columns for ample map visibility) -->
+    <!-- 2. Interactive Map (Left Panel - 7 Cols) -->
     <div class="col-lg-7 d-flex flex-column">
       <div class="content-card d-flex flex-column h-100">
         <div class="admin-card-header">
           <div class="admin-card-header-left">
-            <div class="admin-card-icon"><i class="bi bi-map"></i></div>
+            <div class="admin-card-icon"><i class="bi bi-map-fill"></i></div>
             <div>
-              <h5>Fleet Map</h5>
-              <p id="fleetCounts">Loading live telemetry…</p>
+              <h5>Live Tactical Map</h5>
+              <p id="fleetCounts">Streaming satellite GPS telemetry…</p>
             </div>
           </div>
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-white text-dark border px-2 py-1 font-monospace small" id="gpsSyncIndicator">
+              <i class="bi bi-arrow-repeat text-primary me-1"></i> 2.5s Sync
+            </span>
+          </div>
         </div>
+        
         <div class="card-body p-0 map-container-box">
           <div id="fleetMap"></div>
         </div>
       </div>
     </div>
 
-    <!-- Fleet Status (5 Columns, 100% Fixed Table, ZERO Horizontal Scroll) -->
+    <!-- 3. Emergency Fleet Command Feed (Right Panel - 5 Cols) -->
     <div class="col-lg-5 d-flex flex-column">
       <div class="content-card d-flex flex-column h-100">
         <div class="admin-card-header">
           <div class="admin-card-header-left">
-            <div class="admin-card-icon"><i class="bi bi-list-check"></i></div>
+            <div class="admin-card-icon"><i class="bi bi-list-stars"></i></div>
             <div>
-              <h5>Fleet Status</h5>
-              <p>Unit · Status · Case · ETA</p>
+              <h5>Fleet Mission Control</h5>
+              <p>Active emergency responses & ready fleet</p>
             </div>
           </div>
-          <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-2 py-1 small" id="unitPillCount">10 Units</span>
+          <span class="badge bg-light text-primary border small" id="missionCountBadge">0 Missions</span>
         </div>
-        <div class="card-body p-0 table-container-box">
-          <div class="fleet-scroll-area">
-            <table class="fleet-smart-table" id="fleetTable">
-              <thead>
-                <tr>
-                  <th style="width: 26%;">Unit</th>
-                  <th style="width: 28%;">Status</th>
-                  <th style="width: 28%;">Case</th>
-                  <th style="width: 18%;" class="text-end">ETA</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colspan="4" class="text-center text-muted py-5">
-                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                    Loading units…
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+
+        <div class="card-body p-0 telemetry-container">
+          <div class="telemetry-scroll-area">
+            
+            <!-- Section 1: Active Emergency Missions -->
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="fw-bold text-uppercase" style="font-size: 0.72rem; color: #dc2626; letter-spacing: 0.05em;">
+                <i class="bi bi-lightning-charge-fill me-1"></i> Active Emergency Missions
+              </span>
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle small py-0" id="activeMissionPill">0 Active</span>
+            </div>
+
+            <div id="activeMissionsList" class="mb-3">
+              <!-- Dynamically populated active mission cards -->
+              <div class="p-3 text-center text-muted bg-white border rounded-3 small">
+                <i class="bi bi-check2-circle text-success fs-5 d-block mb-1"></i>
+                No active emergency dispatches right now. Fleet is standing by.
+              </div>
+            </div>
+
+            <!-- Section 2: Standby Fleet -->
+            <div class="d-flex align-items-center justify-content-between mb-2 mt-3 pt-2 border-top">
+              <span class="fw-bold text-uppercase" style="font-size: 0.72rem; color: #475569; letter-spacing: 0.05em;">
+                <i class="bi bi-shield-check text-success me-1"></i> Standby Fleet (Available)
+              </span>
+              <span class="badge bg-light text-secondary border small py-0" id="standbyCountPill">10 Ready</span>
+            </div>
+
+            <div id="standbyFleetList">
+              <!-- Dynamically populated standby units -->
+              <div class="text-center text-muted py-3 small">Loading fleet units…</div>
+            </div>
+
           </div>
         </div>
       </div>
     </div>
 
   </div>
-</div>
+</main>
 
 <!-- ================= FOOTER ================= -->
 <footer class="site-footer">
-  <div class="container text-center">
-    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03</p>
-    <p class="mb-0 powered-by">Powered by <strong>Musafir Devs</strong></p>
+  <div class="container-fluid px-4 text-center">
+    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03 · Powered by <strong>Musafir Devs</strong></p>
   </div>
 </footer>
 {% endblock %}
@@ -326,7 +579,7 @@
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  /* ===== Mobile Sidebar Handlers ===== */
+  /* ===== Mobile Sidebar ===== */
   const sidebar = document.getElementById('mobileSidebar');
   const sidebarOverlay = document.getElementById('mobileSidebarOverlay');
   const hamburger = document.getElementById('mobileHamburger');
@@ -343,148 +596,299 @@
   sidebarOverlay?.addEventListener('click', closeSidebar);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
 
-  /* ===== Live Fleet Map ===== */
+  /* ===== High-Tech Live Radar Map ===== */
   const API = "{{ url_for('ambulances_live') }}";
-  let map, markers = {}, initialized = false;
+  let map, markers = {}, polylines = {}, initialized = false;
+  let activeUnitFocus = null;
 
   function initMap() {
-    map = L.map('fleetMap').setView([27.53, 68.76], 12);
+    map = L.map('fleetMap', {
+      zoomControl: true
+    }).setView([27.5300, 68.7600], 13);
+
+    // 100% Free OpenStreetMap Standard Tiles (No API Key Required)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
+      maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
+
     initialized = true;
   }
 
   function recenterMap() {
     if (map) {
-      map.setView([27.53, 68.76], 12, { animate: true });
+      map.flyTo([27.5300, 68.7600], 13, { duration: 1.2 });
+      activeUnitFocus = null;
+      document.querySelectorAll('.emergency-card').forEach(c => c.classList.remove('selected-mission'));
     }
   }
 
   function focusUnit(id) {
-    if (markers[id] && map) {
-      const pos = markers[id].getLatLng();
-      map.flyTo(pos, 15, { duration: 1 });
-      markers[id].openPopup();
+    activeUnitFocus = id;
+    if (markers['amb_' + id] && map) {
+      const pos = markers['amb_' + id].getLatLng();
+      map.flyTo(pos, 15, { duration: 1.2 });
+      markers['amb_' + id].openPopup();
+    }
+    document.querySelectorAll('.emergency-card').forEach(c => c.classList.remove('selected-mission'));
+    const targetCard = document.getElementById('mission-card-' + id);
+    if (targetCard) targetCard.classList.add('selected-mission');
+  }
 
-      document.querySelectorAll('#fleetTable tbody tr').forEach(r => r.classList.remove('active-unit'));
-      const activeRow = document.getElementById('unit-row-' + id);
-      if (activeRow) activeRow.classList.add('active-unit');
+  /* ===== Map Marker Creators ===== */
+  function createAmbulanceIcon(isEmergency) {
+    if (isEmergency) {
+      return L.divIcon({
+        className: '',
+        html: `
+          <div class="radar-marker-wrap">
+            <div class="radar-marker-pulse"></div>
+            <div class="radar-marker-core"><i class="bi bi-broadcast"></i></div>
+          </div>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      });
+    } else {
+      return L.divIcon({
+        className: '',
+        html: `
+          <div class="radar-marker-ready">
+            <i class="bi bi-truck-front-fill"></i>
+          </div>
+        `,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
     }
   }
 
-  function getMarkerHtml(status) {
-    let cls = 'fmarker-ready';
-    let icon = '<i class="bi bi-truck-front-fill"></i>';
-    if (status === 'On the way') {
-      cls = 'fmarker-onway';
-      icon = '<i class="bi bi-broadcast"></i>';
-    } else if (status === 'Occupied') {
-      cls = 'fmarker-busy';
-      icon = '<i class="bi bi-hospital-fill"></i>';
-    }
+  function createPatientIcon(priority) {
     return L.divIcon({
       className: '',
-      html: `<div class="fleet-marker-icon ${cls}">${icon}</div>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 15]
+      html: `
+        <div class="radar-marker-patient" style="${priority === 'Critical' ? 'background:#dc2626;' : 'background:#ea580c;'}">
+          <i class="bi bi-person-fill"></i>
+        </div>
+      `,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
     });
   }
 
+  function createHospitalIcon() {
+    return L.divIcon({
+      className: '',
+      html: `
+        <div class="radar-marker-hospital">
+          <i class="bi bi-hospital"></i>
+        </div>
+      `,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    });
+  }
+
+  /* ===== Live Telemetry Poller ===== */
   async function poll() {
     try {
       const res = await fetch(API);
-      const d = await res.json();
+      const data = await res.json();
       if (!initialized) initMap();
 
+      // Counts
+      const totalUnits = data.counts.total;
+      const onTheWayUnits = data.ambulances.filter(a => a.case != null);
+      const standbyUnits = data.ambulances.filter(a => a.case == null);
+
       document.getElementById('fleetCounts').textContent =
-        `${d.counts.available} available · ${d.counts.on_the_way} on the way · ${d.counts.occupied} occupied · ${d.counts.total} total`;
-      document.getElementById('unitPillCount').textContent = `${d.counts.total} Units`;
+        `${standbyUnits.length} Standby Base · ${onTheWayUnits.length} Emergency Dispatches · ${totalUnits} Total Fleet`;
+      document.getElementById('kpiActiveCount').textContent = onTheWayUnits.length;
+      document.getElementById('kpiReadyCount').textContent = standbyUnits.length;
+      document.getElementById('activeMissionPill').textContent = `${onTheWayUnits.length} Active`;
+      document.getElementById('standbyCountPill').textContent = `${standbyUnits.length} Ready`;
+      document.getElementById('missionCountBadge').textContent = `${onTheWayUnits.length} Emergency`;
 
-      const tbody = document.querySelector('#fleetTable tbody');
-      tbody.innerHTML = '';
+      // Fastest ETA calculation
+      let fastestEta = null;
+      onTheWayUnits.forEach(a => {
+        if (a.eta_min != null && (fastestEta === null || a.eta_min < fastestEta)) {
+          fastestEta = a.eta_min;
+        }
+      });
+      document.getElementById('kpiFastestEta').textContent = fastestEta != null ? `${fastestEta} min` : (onTheWayUnits.length ? 'At Scene' : '—');
 
-      d.ambulances.forEach(a => {
+      // Update Active Missions List
+      const activeListContainer = document.getElementById('activeMissionsList');
+      if (onTheWayUnits.length === 0) {
+        activeListContainer.innerHTML = `
+          <div class="p-3 text-center text-muted bg-white border rounded-3 small">
+            <i class="bi bi-check2-circle text-success fs-5 d-block mb-1"></i>
+            No active emergency dispatches right now. Fleet is standing by at base.
+          </div>
+        `;
+      } else {
+        let activeHtml = '';
+        onTheWayUnits.forEach(a => {
+          const isSelected = activeUnitFocus === a.id ? 'selected-mission' : '';
+          const phaseText = a.phase === 'arrived' ? 'Arrived at Patient / Hospital' : (a.phase === 'to_hospital' ? 'Transporting to Hospital' : 'En route to Patient');
+          const etaText = a.phase === 'arrived' ? '✔ Arrived' : (a.eta_min != null ? `⚡ ${a.eta_min} min ETA` : 'Dispatched');
+          const progressPercent = a.phase === 'arrived' ? 100 : (a.phase === 'to_hospital' ? 75 : 40);
+
+          activeHtml += `
+            <div class="emergency-card ${isSelected}" id="mission-card-${a.id}" onclick="focusUnit(${a.id})">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <div class="d-flex align-items-center gap-1">
+                  <span class="unit-code-tag">${a.unit}</span>
+                  <span class="unit-tier-badge">${a.type || 'ALS'}</span>
+                </div>
+                <span class="badge ${a.phase === 'arrived' ? 'bg-success text-white' : 'bg-danger text-white'} px-2 py-1 small fw-bold">
+                  ${etaText}
+                </span>
+              </div>
+
+              <div class="fw-bold text-dark mb-1" style="font-size: 0.84rem;">
+                <i class="bi bi-person-fill text-danger me-1"></i>
+                ${a.case.code} — ${a.case.patient} <span class="badge bg-warning text-dark border ms-1" style="font-size: 0.68rem;">${a.case.priority}</span>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center text-muted small" style="font-size: 0.74rem;">
+                <span><i class="bi bi-arrow-right-circle text-primary me-1"></i>${phaseText}</span>
+                <span class="text-primary fw-semibold"><i class="bi bi-crosshair me-1"></i>Focus</span>
+              </div>
+
+              <div class="dispatch-progress">
+                <div class="dispatch-progress-bar" style="width: ${progressPercent}%;"></div>
+              </div>
+            </div>
+          `;
+        });
+        activeListContainer.innerHTML = activeHtml;
+      }
+
+      // Update Standby Fleet List
+      const standbyListContainer = document.getElementById('standbyFleetList');
+      if (standbyUnits.length === 0) {
+        standbyListContainer.innerHTML = `<div class="text-center text-muted small py-2">All ambulances currently responding.</div>`;
+      } else {
+        let standbyHtml = '';
+        standbyUnits.forEach(a => {
+          standbyHtml += `
+            <div class="standby-item" onclick="focusUnit(${a.id})">
+              <div class="d-flex align-items-center gap-2">
+                <span class="unit-code-tag">${a.unit}</span>
+                <span class="unit-tier-badge">${a.type || 'BLS'}</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge-status-ready"><i class="bi bi-check-circle-fill"></i> Standby</span>
+                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.7rem;">
+                  <i class="bi bi-geo-alt"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        });
+        standbyListContainer.innerHTML = standbyHtml;
+      }
+
+      // Update Leaflet Map Markers & Polylines
+      data.ambulances.forEach(a => {
+        const isEmergency = a.case != null;
         const pos = [a.position.lat, a.position.lng];
 
-        if (markers[a.id]) {
-          markers[a.id].setLatLng(pos);
-          markers[a.id].setIcon(getMarkerHtml(a.status));
+        // Ambulance marker
+        if (markers['amb_' + a.id]) {
+          markers['amb_' + a.id].setLatLng(pos);
+          markers['amb_' + a.id].setIcon(createAmbulanceIcon(isEmergency));
         } else {
-          markers[a.id] = L.marker(pos, {
-            icon: getMarkerHtml(a.status)
+          markers['amb_' + a.id] = L.marker(pos, {
+            icon: createAmbulanceIcon(isEmergency)
           }).addTo(map);
+          markers['amb_' + a.id].on('click', () => focusUnit(a.id));
         }
 
+        // Popup Content
         let popup = `
-          <div class="amb-popup">
-            <strong>${a.unit}</strong> (${a.type || 'BLS'})<br>
-            Status: <strong>${a.status}</strong>
+          <div style="font-size: 0.85rem; line-height: 1.45; min-width: 180px;">
+            <div class="d-flex align-items-center justify-content-between mb-1 pb-1 border-bottom">
+              <strong>${a.unit}</strong> <span class="badge bg-light text-primary border">${a.type || 'ALS'}</span>
+            </div>
+            <div>Status: <span class="fw-bold ${isEmergency ? 'text-danger' : 'text-success'}">${a.status}</span></div>
         `;
-        if (a.case) {
+
+        if (isEmergency && a.case) {
           popup += `
-            <br>Case: <strong>${a.case.code}</strong> — ${a.case.patient} (${a.case.priority})
-            ${a.case.doctor ? `<br>Doctor: ${a.case.doctor}` : ''}
-            ${a.case.bed ? `<br>Bed: ${a.case.bed}` : ''}
+            <div class="mt-1 pt-1 border-top">
+              <div>Responding to: <strong>${a.case.patient}</strong></div>
+              <div>Urgency: <span class="badge bg-danger text-white">${a.case.priority}</span></div>
+              <div>Doctor: <strong>${a.case.doctor || 'Assigned'}</strong></div>
+              <div class="text-danger fw-bold mt-1">ETA: ${a.eta_min != null ? a.eta_min + ' min' : 'At Scene'}</div>
+            </div>
           `;
-          if (a.patient && !markers['p' + a.id]) {
-            markers['p' + a.id] = L.marker([a.patient.lat, a.patient.lng], {
-              icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26]})
-            }).addTo(map).bindPopup(`Patient pickup — ${a.case.code}`);
-          }
-          if (a.hospital_pos && !markers['h' + a.id]) {
-            markers['h' + a.id] = L.marker([a.hospital_pos.lat, a.hospital_pos.lng], {
-              icon: L.divIcon({className: '', html: '🏥', iconSize: [26, 26]})
-            }).addTo(map).bindPopup(a.hospital_pos.name);
-          }
-        }
-        popup += '</div>';
-        markers[a.id].bindPopup(popup);
 
-        // Status pill
-        let statusBadge = '';
-        if (a.status === 'Available') {
-          statusBadge = `<span class="badge-status-ready">Available</span>`;
-        } else if (a.status === 'On the way') {
-          statusBadge = `<span class="badge-status-onway">On the way</span>`;
+          // Draw Patient Pickup Marker
+          if (a.patient && a.patient.lat && a.patient.lng) {
+            const pKey = 'pat_' + a.id;
+            const pPos = [a.patient.lat, a.patient.lng];
+            if (markers[pKey]) {
+              markers[pKey].setLatLng(pPos);
+            } else {
+              markers[pKey] = L.marker(pPos, {
+                icon: createPatientIcon(a.case.priority)
+              }).addTo(map).bindPopup(`<strong>Patient Pickup</strong><br>${a.case.patient}<br>${a.patient.address || 'Khairpur'}`);
+            }
+
+            // Draw animated dashed route line (Hospital/Start -> Ambulance -> Patient)
+            const polyKey = 'route_' + a.id;
+            let routePoints = [];
+            if (a.start && a.start.lat) routePoints.push([a.start.lat, a.start.lng]);
+            routePoints.push(pos);
+            routePoints.push(pPos);
+
+            if (polylines[polyKey]) {
+              polylines[polyKey].setLatLngs(routePoints);
+            } else {
+              polylines[polyKey] = L.polyline(routePoints, {
+                color: '#dc2626',
+                weight: 4,
+                opacity: 0.8,
+                dashArray: '8, 8'
+              }).addTo(map);
+            }
+          }
+
+          // Draw Hospital Destination Marker
+          if (a.hospital_pos && a.hospital_pos.lat) {
+            const hKey = 'hosp_' + a.id;
+            const hPos = [a.hospital_pos.lat, a.hospital_pos.lng];
+            if (!markers[hKey]) {
+              markers[hKey] = L.marker(hPos, {
+                icon: createHospitalIcon()
+              }).addTo(map).bindPopup(`<strong>Hospital Destination</strong><br>${a.hospital_pos.name || 'Khairpur Hospital'}`);
+            }
+          }
         } else {
-          statusBadge = `<span class="badge-status-busy">Occupied</span>`;
+          // If ambulance is standby, clean up any old mission route or patient marker
+          if (markers['pat_' + a.id]) {
+            map.removeLayer(markers['pat_' + a.id]);
+            delete markers['pat_' + a.id];
+          }
+          if (polylines['route_' + a.id]) {
+            map.removeLayer(polylines['route_' + a.id]);
+            delete polylines['route_' + a.id];
+          }
         }
 
-        // Case info
-        let caseCell = '<span class="text-muted">—</span>';
-        if (a.case) {
-          caseCell = `<strong class="text-primary">${a.case.code}</strong> <span class="text-muted small text-truncate d-inline-block" style="max-width:80px; vertical-align:bottom;" title="${a.case.patient}">${a.case.patient}</span>`;
-        }
-
-        // ETA info
-        let etaCell = '<span class="text-muted">—</span>';
-        if (a.phase === 'arrived') {
-          etaCell = `<span class="arrived-tag"><i class="bi bi-check2"></i> Arrived</span>`;
-        } else if (a.eta_min != null) {
-          etaCell = `<span class="eta-tag">${a.eta_min} min</span>`;
-        }
-
-        const tr = document.createElement('tr');
-        tr.id = 'unit-row-' + a.id;
-        tr.onclick = () => focusUnit(a.id);
-        tr.innerHTML = `
-          <td>
-            <span class="unit-code-tag">${a.unit}</span>
-            <span class="unit-sub-type">${a.type || 'BLS'}</span>
-          </td>
-          <td>${statusBadge}</td>
-          <td>${caseCell}</td>
-          <td class="text-end">${etaCell}</td>
-        `;
-        tbody.appendChild(tr);
+        popup += `</div>`;
+        markers['amb_' + a.id].bindPopup(popup);
       });
+
     } catch (e) {
-      console.error(e);
+      console.error('Radar poll error:', e);
     }
   }
 
+  // Initial call and safe real-time 2500ms sync
   poll();
   setInterval(poll, 2500);
 </script>

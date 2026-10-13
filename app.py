@@ -9,6 +9,7 @@ app = Flask(__name__)
 app.secret_key = 'medcare-emergency-ht03-secret-key-2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medcare_emergency.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SESSION_PERMANENT'] = False
 
 db = SQLAlchemy(app)
 
@@ -91,6 +92,13 @@ def login_required(role=None):
                 flash('Please login first.', 'warning')
                 return redirect(url_for('login'))
             if role and session.get('role') != role and session.get('role') != 'admin':
+                user_role = session.get('role')
+                if user_role == 'doctor':
+                    flash('Access restricted to administrators.', 'warning')
+                    return redirect(url_for('doctor_dashboard'))
+                elif user_role == 'ambulance':
+                    flash('Access restricted to administrators.', 'warning')
+                    return redirect(url_for('ambulance_dashboard'))
                 flash('Access denied for your role.', 'danger')
                 return redirect(url_for('index'))
             return f(*args, **kwargs)
@@ -270,6 +278,20 @@ def favicon():
 def index():
     return render_template('index.html')
 
+@app.route('/dashboard')
+def dashboard_redirect():
+    if 'user_id' not in session:
+        flash('Please login to access the dashboard.', 'info')
+        return redirect(url_for('login'))
+    role = session.get('role')
+    if role == 'admin':
+        return redirect(url_for('admin_dashboard'))
+    elif role == 'doctor':
+        return redirect(url_for('doctor_dashboard'))
+    elif role == 'ambulance':
+        return redirect(url_for('ambulance_dashboard'))
+    return redirect(url_for('login'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -277,6 +299,7 @@ def login():
         password = request.form.get('password', '')
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password_hash, password):
+            session.clear()
             session['user_id'] = user.id
             session['username'] = user.username
             session['name'] = user.name
@@ -425,12 +448,19 @@ def ambulances_live():
                 item['phase'] = state['phase']
                 item['patient'] = state['patient']
                 item['hospital_pos'] = state['hospital']
+                item['start'] = state['start']
+            item['status'] = 'Occupied' if item.get('phase') == 'arrived' else 'On the way'
+        else:
+            if amb.status != 'Available':
+                amb.status = 'Available'
+                db.session.commit()
+            item['status'] = 'Available'
         out.append(item)
     return jsonify({'ambulances': out,
                     'counts': {'total': len(ambs),
-                               'available': sum(1 for a in ambs if a.status == 'Available'),
-                               'on_the_way': sum(1 for a in ambs if a.status == 'On the way'),
-                               'occupied': sum(1 for a in ambs if a.status == 'Occupied')}})
+                               'available': sum(1 for a in out if a['status'] == 'Available'),
+                               'on_the_way': sum(1 for a in out if a['status'] == 'On the way'),
+                               'occupied': sum(1 for a in out if a['status'] == 'Occupied')}})
 
 # ---------- ADMIN / STAFF MODULE ----------
 
@@ -481,6 +511,20 @@ def admin_cases():
                 c.status = 'Closed'
                 db.session.commit()
                 flash('Case closed and resources freed.', 'success')
+        elif action == 'delete':
+            c = Case.query.get(int(request.form['case_id']))
+            if c:
+                code = c.case_code
+                Bed.query.filter_by(assigned_case_id=c.id).update({'status': 'Available', 'assigned_case_id': None})
+                if c.assigned_doctor_id:
+                    doc = User.query.get(c.assigned_doctor_id)
+                    if doc: doc.status = 'Available'
+                if c.assigned_ambulance_id:
+                    amb = User.query.get(c.assigned_ambulance_id)
+                    if amb: amb.status = 'Available'
+                db.session.delete(c)
+                db.session.commit()
+                flash(f'Case {code} permanently deleted and resources freed.', 'success')
         return redirect(url_for('admin_cases'))
     priority_filter = request.args.get('priority', 'all')
     q = Case.query.order_by(Case.registered_at.desc())
@@ -508,6 +552,72 @@ def update_resource():
     flash('Status updated.', 'success')
     return redirect(url_for('admin_resources'))
 
+@app.route('/admin/resource/add', methods=['POST'])
+@login_required(role='admin')
+def add_resource():
+    rtype = request.form.get('resource_type')
+    if rtype == 'bed':
+        code = request.form.get('bed_code', '').strip().upper()
+        btype = request.form.get('bed_type', 'General')
+        if not code:
+            flash('Bed code is required.', 'danger')
+        elif Bed.query.filter_by(bed_code=code).first():
+            flash(f'Bed {code} already exists.', 'warning')
+        else:
+            db.session.add(Bed(bed_code=code, bed_type=btype, status='Available'))
+            db.session.commit()
+            flash(f'Bed {code} ({btype}) registered successfully.', 'success')
+    elif rtype == 'doctor':
+        name = request.form.get('doctor_name', '').strip()
+        specialty = request.form.get('specialty', 'General Medicine').strip()
+        phone = request.form.get('phone', '0300-1234567').strip()
+        if not name:
+            flash('Doctor name is required.', 'danger')
+        else:
+            clean_name = name.lower().replace('dr.', '').replace('dr ', '').replace(' ', '_')
+            username = f"doc_{clean_name}_{int(datetime.utcnow().timestamp()) % 10000}"
+            pw = generate_password_hash('doctor123')
+            db.session.add(User(username=username, password_hash=pw, role='doctor', name=name, specialty=specialty, phone=phone, status='Available'))
+            db.session.commit()
+            flash(f'Doctor {name} registered successfully.', 'success')
+    elif rtype == 'ambulance':
+        unit = request.form.get('unit_id', '').strip().upper()
+        vtype = request.form.get('vehicle_type', 'ALS')
+        phone = request.form.get('phone', '0311-9876543').strip()
+        if not unit:
+            flash('Ambulance unit code is required.', 'danger')
+        else:
+            clean_unit = unit.lower().replace(' ', '_').replace('-', '_')
+            username = f"amb_{clean_unit}_{int(datetime.utcnow().timestamp()) % 10000}"
+            pw = generate_password_hash('ambulance123')
+            db.session.add(User(username=username, password_hash=pw, role='ambulance', name=f'Unit {unit}', vehicle_id=unit, vehicle_type=vtype, phone=phone, status='Available', lat=27.5300, lng=68.7600))
+            db.session.commit()
+            flash(f'Ambulance {unit} registered successfully.', 'success')
+    return redirect(url_for('admin_resources'))
+
+@app.route('/admin/resource/delete', methods=['POST'])
+@login_required(role='admin')
+def delete_resource():
+    rtype = request.form.get('type')
+    rid = int(request.form.get('id'))
+    if rtype == 'bed':
+        b = Bed.query.get(rid)
+        if b:
+            db.session.delete(b)
+            db.session.commit()
+            flash(f'Bed {b.bed_code} removed.', 'success')
+    elif rtype in ('doctor', 'ambulance'):
+        u = User.query.get(rid)
+        if u:
+            if rtype == 'doctor':
+                Case.query.filter_by(assigned_doctor_id=u.id).update({'assigned_doctor_id': None})
+            else:
+                Case.query.filter_by(assigned_ambulance_id=u.id).update({'assigned_ambulance_id': None})
+            db.session.delete(u)
+            db.session.commit()
+            flash(f'{u.name} removed from resources.', 'success')
+    return redirect(url_for('admin_resources'))
+
 @app.route('/admin/allocate', methods=['GET', 'POST'])
 @login_required(role='admin')
 def admin_allocate():
@@ -516,16 +626,87 @@ def admin_allocate():
         if not c:
             flash('Case not found.', 'danger')
             return redirect(url_for('admin_allocate'))
-        summary = auto_allocate(c)
-        db.session.commit()
-        msg = f'Allocation applied for {c.case_code}.'
-        if not summary['bed']: msg += ' No free bed available!'
-        if not summary['doctor']: msg += ' No free doctor available!'
-        if not summary['ambulance']: msg += ' No ambulance available in 20 km range!'
-        flash(msg, 'success')
-        return redirect(url_for('admin_allocate'))
+
+        mode = request.form.get('mode', 'auto')
+
+        # Release current case's resources first so re-allocation doesn't self-block
+        if c.assigned_bed_id:
+            old_bed = Bed.query.get(c.assigned_bed_id)
+            if old_bed:
+                old_bed.status = 'Available'
+                old_bed.assigned_case_id = None
+            c.assigned_bed_id = None
+        if c.assigned_doctor_id:
+            old_doc = User.query.get(c.assigned_doctor_id)
+            if old_doc:
+                old_doc.status = 'Available'
+            c.assigned_doctor_id = None
+        if c.assigned_ambulance_id:
+            old_amb = User.query.get(c.assigned_ambulance_id)
+            if old_amb:
+                old_amb.status = 'Available'
+            c.assigned_ambulance_id = None
+
+        if mode == 'manual':
+            bid = request.form.get('bed_id')
+            did = request.form.get('doctor_id')
+            aid = request.form.get('ambulance_id')
+
+            assigned_items = []
+            if bid:
+                new_bed = Bed.query.get(int(bid))
+                if new_bed:
+                    new_bed.status = 'Occupied'
+                    new_bed.assigned_case_id = c.id
+                    c.assigned_bed_id = new_bed.id
+                    assigned_items.append(f'Bed {new_bed.bed_code}')
+            if did:
+                new_doc = User.query.get(int(did))
+                if new_doc:
+                    new_doc.status = 'Busy'
+                    c.assigned_doctor_id = new_doc.id
+                    assigned_items.append(new_doc.name)
+            if aid:
+                new_amb = User.query.get(int(aid))
+                if new_amb:
+                    new_amb.status = 'On the way'
+                    c.assigned_ambulance_id = new_amb.id
+                    c.dispatched_at = datetime.utcnow()
+                    c.status = 'Dispatched'
+                    assigned_items.append(f'Ambulance {new_amb.vehicle_id or new_amb.name}')
+
+            if not c.status or c.status == 'Incoming':
+                c.status = 'Dispatched' if c.assigned_ambulance_id else 'Active'
+
+            db.session.commit()
+            if assigned_items:
+                flash(f'Manual dispatch applied for {c.case_code}: {", ".join(assigned_items)}.', 'success')
+            else:
+                flash(f'Resources freed for {c.case_code}.', 'info')
+            return redirect(url_for('admin_allocate'))
+
+        else:  # auto
+            summary = auto_allocate(c)
+            db.session.commit()
+            msg = f'Smart allocation applied for {c.case_code}.'
+            if not summary['bed']: msg += ' No free bed available!'
+            if not summary['doctor']: msg += ' No free doctor available!'
+            if not summary['ambulance']: msg += ' No ambulance available in 20 km range!'
+            flash(msg, 'success' if (summary['bed'] or summary['doctor']) else 'warning')
+            return redirect(url_for('admin_allocate'))
+
     active = Case.query.filter(Case.status.in_(['Active', 'Incoming', 'Dispatched'])).order_by(Case.registered_at.desc()).all()
-    return render_template('admin/allocate.html', cases=active)
+    all_beds = Bed.query.all()
+    all_docs = User.query.filter_by(role='doctor').all()
+    all_ambs = User.query.filter_by(role='ambulance').all()
+    free_beds = sum(1 for b in all_beds if b.status == 'Available')
+    free_icu = sum(1 for b in all_beds if b.status == 'Available' and b.bed_type == 'ICU')
+    free_docs = sum(1 for d in all_docs if d.status == 'Available')
+    free_ambs = sum(1 for a in all_ambs if a.status == 'Available')
+    return render_template('admin/allocate.html', cases=active,
+                           beds=all_beds, doctors=all_docs, ambulances=all_ambs,
+                           free_beds=free_beds, free_icu=free_icu,
+                           free_docs=free_docs, free_ambs=free_ambs)
 
 # ---------- DOCTOR MODULE ----------
 

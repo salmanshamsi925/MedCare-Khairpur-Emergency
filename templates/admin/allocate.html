@@ -1,44 +1,335 @@
 {% extends "base.html" %}
-{% block title %}Allocate Resources - MedCare Khairpur{% endblock %}
+{% block title %}Smart Resource Allocation - MedCare Khairpur{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --adm-navy: #1F3971;
+    --adm-navy-dark: #122448;
+    --adm-red: #e53935;
+    --adm-yellow: #FFAE27;
+    --adm-green: #10b981;
+    --adm-border: #e2e8f0;
+    --adm-bg: #f6f8fc;
+  }
+
+  body {
+    background-color: var(--adm-bg);
+  }
+
+  /* ===== Card Shells & Headers ===== */
+  .content-card {
+    background: #ffffff;
+    border: 1px solid var(--adm-border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.05);
+  }
   .admin-card-header {
-    display: flex; align-items: center; gap: 14px; padding: 20px 24px;
-    background: linear-gradient(120deg, var(--navy), var(--navy-light));
-    color: #fff; border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 20px;
+    background: linear-gradient(135deg, #102146 0%, #1F3971 70%, #294c96 100%);
+    color: #fff;
+  }
+  .admin-card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
   .admin-card-icon {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: rgba(255,174,39,0.22); color: var(--yellow);
-    display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba(255, 174, 39, 0.16);
+    border: 1px solid rgba(255, 174, 39, 0.35);
+    color: #FFAE27;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
   }
-  .admin-card-header h5 { margin: 0; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff; }
-  .admin-card-header p { margin: 2px 0 0; font-size: 0.78rem; color: rgba(255,255,255,0.75); }
-  .content-card { overflow: hidden; }
+  .admin-card-header h5 {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: #fff;
+  }
+  .admin-card-header p {
+    margin: 2px 0 0;
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.75);
+  }
 
-  .btn-allocate {
-    background: var(--navy); color: #fff; border: none; border-radius: 8px;
-    padding: 7px 16px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
-    transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  /* Executive Topbar */
+  .executive-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--adm-border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
   }
-  .btn-allocate:hover { background: var(--navy-light); transform: translateY(-2px); box-shadow: 0 8px 18px rgba(31,57,113,0.30); }
-  .table thead th { background: #f7f9fc; color: var(--navy); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border) !important; }
-  .table td { vertical-align: middle; }
-  .rules-list { list-style: none; padding: 0; margin: 0; }
-  .rules-list li {
-    display: flex; gap: 12px; align-items: flex-start;
-    padding: 12px 0; border-bottom: 1px solid #f0f2f5; font-size: 0.88rem;
+  .topbar-left { display: flex; flex-direction: column; gap: 3px; }
+  .topbar-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .topbar-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #102146;
+    margin: 0;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .rules-list li:last-child { border-bottom: none; }
-  .rules-icon {
-    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 0.95rem;
+  .topbar-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
+  .live-dot-pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+  }
+  .topbar-sub { font-size: 0.8rem; color: #64748b; margin: 0; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .btn-topbar-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 15px;
+    border-radius: 9px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.22s ease;
+  }
+  .btn-radar {
+    background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(229, 57, 53, 0.25);
+  }
+  .btn-radar:hover { color: #ffffff; transform: translateY(-1px); }
+  .btn-cases {
+    background: #ffffff;
+    color: #1F3971;
+    border: 1.5px solid var(--adm-border);
+  }
+  .btn-cases:hover { background: #f8fafc; color: #1F3971; transform: translateY(-1px); }
+
+  .dashboard-main-content {
+    padding: 18px 24px 32px;
+    flex: 1;
+  }
+
+  /* Readiness KPI Ribbon */
+  .readiness-pill {
+    background: #ffffff;
+    border: 1px solid var(--adm-border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 140px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+  }
+  .readiness-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .readiness-val { font-size: 1.1rem; font-weight: 800; color: #102146; line-height: 1; }
+  .readiness-label { font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+
+  /* Table Styles */
+  .table-modern {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .table-modern thead th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.73rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 11px 14px;
+    border-bottom: 1.5px solid var(--adm-border) !important;
+    white-space: nowrap;
+  }
+  .table-modern tbody tr {
+    transition: background-color 0.15s ease;
+  }
+  .table-modern tbody tr:hover {
+    background-color: #f8fafc;
+  }
+  .table-modern tbody td {
+    padding: 11px 14px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    font-size: 0.86rem;
+  }
+
+  .case-code-badge {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--adm-navy);
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    padding: 2px 8px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  .priority-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 14px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .priority-pill-critical { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .priority-pill-high     { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+  .priority-pill-medium   { background: #fefce8; color: #ca8a04; border: 1px solid #fef08a; }
+  .priority-pill-low      { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+
+  /* Action Buttons */
+  .btn-allocate-magic {
+    background: linear-gradient(135deg, #102146 0%, #1F3971 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 8px rgba(31, 57, 113, 0.25);
+  }
+  .btn-allocate-magic:hover {
+    background: linear-gradient(135deg, #1F3971 0%, #2563eb 100%);
+    transform: translateY(-1px);
+    color: #ffffff;
+  }
+
+  .btn-reallocate {
+    background: #f8fafc;
+    color: #334155;
+    border: 1.5px solid var(--adm-border);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+  .btn-reallocate:hover {
+    background: #ffffff;
+    border-color: #94a3b8;
+    color: #0f172a;
+    transform: translateY(-1px);
+  }
+
+  .btn-radar-mini {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    border-radius: 7px;
+    padding: 5px 8px;
+    font-size: 0.76rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+  .btn-radar-mini:hover {
+    background: #dc2626;
+    color: #ffffff;
+  }
+
+  /* Interactive Workbench Form */
+  .workbench-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .workbench-select {
+    border: 1.5px solid var(--adm-border);
+    border-radius: 9px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    background: #fbfcfe;
+    color: #0f172a;
+    transition: all 0.2s ease;
+  }
+  .workbench-select:focus {
+    border-color: var(--adm-navy);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(31, 57, 113, 0.10);
+    outline: none;
+  }
+
+  .site-footer {
+    margin-top: auto !important;
+    margin-bottom: 0 !important;
+    padding: 16px 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    border-top: 1px solid var(--adm-border);
+    background: #ffffff;
+  }
+
   @media (max-width: 767px) {
-    .admin-card-header { padding: 16px 18px; flex-wrap: wrap; }
-    .table { font-size: 0.85rem; }
+    .executive-topbar { padding: 12px 16px; }
+    .dashboard-main-content { padding: 14px 16px 28px; }
+    .admin-card-header { padding: 12px 16px; flex-wrap: wrap; }
+    .table-modern { font-size: 0.82rem; }
   }
 </style>
 {% endblock %}
@@ -46,145 +337,371 @@
 {% block body %}
 {% include 'admin/_nav.html' %}
 
-<!-- ================= PAGE HERO ================= -->
-<div class="about-hero-area about-hero-small">
-  <div class="about-hero-bg"></div>
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-lg-8 col-md-12">
-        <div class="about-hero-content">
-          <h2 class="about-hero-title" style="font-size: 32px; margin-bottom: 8px;">
-            <i class="bi bi-magic me-2"></i>Smart Allocation
-          </h2>
-          <p class="about-hero-text" style="margin-bottom: 0;">
-            Priority-based bed + doctor + ambulance (within 20 km) suggestion engine
-          </p>
-        </div>
-      </div>
-      <div class="col-lg-4 d-none d-lg-block">
-        <div class="text-center" style="font-size: 5rem; opacity: 0.25;">⚡</div>
-      </div>
+<!-- ================= EXECUTIVE TOPBAR ================= -->
+<header class="executive-topbar">
+  <div class="topbar-left">
+    <div class="topbar-title-row">
+      <h1 class="topbar-title">
+        <i class="bi bi-magic text-warning"></i>
+        <span>Smart Resource Allocation</span>
+      </h1>
+      <span class="topbar-status-chip">
+        <span class="live-dot-pulse"></span>
+        <span>Interactive Dispatch Engine</span>
+      </span>
     </div>
+    <p class="topbar-sub">
+      Automated triage matching & direct administrative override for beds, doctors, and emergency ambulances
+    </p>
   </div>
-</div>
+  <div class="topbar-right">
+    <a href="{{ url_for('admin_cases') }}" class="btn-topbar-action btn-cases">
+      <i class="bi bi-clipboard2-pulse text-danger"></i>
+      <span>Emergency Cases</span>
+    </a>
+    <a href="{{ url_for('admin_track') }}" class="btn-topbar-action btn-radar">
+      <i class="bi bi-broadcast"></i>
+      <span>Live Fleet Radar</span>
+    </a>
+  </div>
+</header>
 
 <!-- ================= CONTENT ================= -->
-<div class="container section-padding" style="padding-top: 36px; padding-bottom: 50px;">
+<main class="dashboard-main-content">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
-      <div class="alert alert-{{ category }} alert-dismissible fade show py-2 form-alert">
+      <div class="alert alert-{{ category }} alert-dismissible fade show py-2 form-alert mb-3">
         {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       </div>
     {% endfor %}
   {% endwith %}
 
-  <div class="row g-3">
-    <!-- Active cases -->
-    <div class="col-lg-7">
-      <div class="content-card">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="bi bi-lightning"></i></div>
-          <div>
-            <h5>Active &amp; Incoming Cases</h5>
-            <p>One-click smart allocation per case</p>
-          </div>
+  <!-- 1. Real-time Capacity Ribbon -->
+  <div class="row g-2 mb-3">
+    <div class="col-6 col-md-3">
+      <div class="readiness-pill">
+        <div class="readiness-icon" style="background:#eff6ff;color:#2563eb;">
+          <i class="bi bi-door-open-fill"></i>
         </div>
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover mb-0">
-              <thead>
-                <tr>
-                  <th>Code</th>
-                  <th>Patient</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Current Assign</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for c in cases %}
-                <tr>
-                  <td><strong>{{ c.case_code }}</strong></td>
-                  <td>{{ c.patient_name }}</td>
-                  <td><span class="badge badge-{{ c.priority|lower }}">{{ c.priority }}</span></td>
-                  <td>
-                    {% if c.status == 'Incoming' %}
-                      <span class="badge bg-warning text-dark">Incoming</span>
-                    {% elif c.status == 'Dispatched' %}
-                      <span class="badge bg-danger">Dispatched</span>
-                    {% else %}
-                      <span class="badge bg-primary">Active</span>
-                    {% endif %}
-                  </td>
-                  <td class="small">
-                    {% if c.doctor %}{{ c.doctor.name.split()[-1] }}{% else %}—{% endif %}
-                    /
-                    {% if c.bed %}{{ c.bed.bed_code }}{% else %}—{% endif %}
-                  </td>
-                  <td>
-                    <form method="POST" class="d-inline">
-                      <input type="hidden" name="case_id" value="{{ c.id }}">
-                      <button type="submit" class="btn-allocate">
-                        <i class="bi bi-lightning me-1"></i> Allocate
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-                {% else %}
-                <tr><td colspan="6" class="text-center text-muted py-4">No active/incoming cases</td></tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+        <div>
+          <div class="readiness-val">{{ free_beds }}</div>
+          <div class="readiness-label">Free Beds Total</div>
         </div>
       </div>
     </div>
-
-    <!-- Allocation rules -->
-    <div class="col-lg-5">
-      <div class="content-card">
-        <div class="admin-card-header">
-          <div class="admin-card-icon"><i class="bi bi-sliders"></i></div>
-          <div>
-            <h5>Allocation Rules</h5>
-            <p>How the engine picks resources</p>
-          </div>
+    <div class="col-6 col-md-3">
+      <div class="readiness-pill">
+        <div class="readiness-icon" style="background:#fef2f2;color:#dc2626;">
+          <i class="bi bi-heart-pulse-fill"></i>
         </div>
-        <div class="card-body">
-          <ul class="rules-list">
-            <li>
-              <div class="rules-icon" style="background:#fdecea;color:#e53935;">🔴</div>
-              <div><strong>Critical</strong> → ICU / Emergency bed + specialist / Emergency doctor first</div>
-            </li>
-            <li>
-              <div class="rules-icon" style="background:#fff4dd;color:#b97c00;">🟠</div>
-              <div><strong>High</strong> → Emergency preferred + available specialist</div>
-            </li>
-            <li>
-              <div class="rules-icon" style="background:#e8f5e9;color:#2e7d32;">🟢</div>
-              <div><strong>Medium / Low</strong> → General beds + any free doctor</div>
-            </li>
-            <li>
-              <div class="rules-icon" style="background:#e8eefb;color:#1F3971;">🚑</div>
-              <div><strong>Ambulance</strong> → Nearest available unit within <strong>20 km</strong> of the patient</div>
-            </li>
-          </ul>
-          <div class="alert alert-light border small mb-0 mt-3">
-            <i class="bi bi-info-circle text-primary me-1"></i>
-            Final decision stays with staff. System only recommends based on current availability.
-          </div>
+        <div>
+          <div class="readiness-val">{{ free_icu }}</div>
+          <div class="readiness-label">Free ICU Beds</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="readiness-pill">
+        <div class="readiness-icon" style="background:#f0fdf4;color:#16a34a;">
+          <i class="bi bi-person-badge-fill"></i>
+        </div>
+        <div>
+          <div class="readiness-val">{{ free_docs }}</div>
+          <div class="readiness-label">Available Doctors</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="readiness-pill">
+        <div class="readiness-icon" style="background:#fff7ed; font-size:1.35rem; line-height:1;">
+          🚑
+        </div>
+        <div>
+          <div class="readiness-val">{{ free_ambs }}</div>
+          <div class="readiness-label">Ready Ambulances</div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
+  <div class="row g-3">
+    
+    <!-- 2. Active Cases Triage Queue (Left Panel) -->
+    <div class="col-lg-7 col-xl-8">
+      <div class="content-card h-100">
+        <div class="admin-card-header">
+          <div class="admin-card-header-left">
+            <div class="admin-card-icon"><i class="bi bi-lightning-charge-fill"></i></div>
+            <div>
+              <h5>Active Triage Queue</h5>
+              <p>Cases awaiting resource allocation or currently active</p>
+            </div>
+          </div>
+          <span class="badge bg-white text-dark border px-2 py-1 small">
+            {{ cases|length }} Case(s)
+          </span>
+        </div>
+
+        <div class="card-body p-0">
+          <table class="table-modern align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width: 10%;">Code</th>
+                <th style="width: 25%;">Patient & Urgency</th>
+                <th style="width: 33%;">Allocated Resources</th>
+                <th style="width: 14%;">Match State</th>
+                <th style="width: 18%;" class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in cases %}
+              <tr>
+                <!-- Code -->
+                <td>
+                  <span class="case-code-badge">{{ c.case_code }}</span>
+                </td>
+
+                <!-- Patient & Urgency -->
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <div>
+                      <div class="fw-bold text-dark">{{ c.patient_name }} <span class="text-muted fw-normal small">({{ c.age }}y)</span></div>
+                      <div class="d-flex align-items-center gap-1 mt-1">
+                        {% if c.priority == 'Critical' %}
+                          <span class="priority-pill priority-pill-critical">Critical</span>
+                        {% elif c.priority == 'High' %}
+                          <span class="priority-pill priority-pill-high">High</span>
+                        {% elif c.priority == 'Medium' %}
+                          <span class="priority-pill priority-pill-medium">Medium</span>
+                        {% else %}
+                          <span class="priority-pill priority-pill-low">Low</span>
+                        {% endif %}
+                        <span class="text-muted small text-truncate d-inline-block" style="max-width: 105px;" title="{{ c.condition }}">
+                          {{ c.condition }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Allocated Resources Details -->
+                <td>
+                  <div class="d-flex flex-column gap-1" style="font-size: 0.78rem;">
+                    <!-- Doctor -->
+                    <div class="d-flex align-items-center gap-1">
+                      <i class="bi bi-person-badge text-primary"></i>
+                      {% if c.doctor %}
+                        <span class="fw-semibold text-dark">{{ c.doctor.name }}</span>
+                        {% if c.doctor.specialty %}<span class="text-muted small">({{ c.doctor.specialty }})</span>{% endif %}
+                      {% else %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-0 px-1">Doctor Needed</span>
+                      {% endif %}
+                    </div>
+
+                    <!-- Bed -->
+                    <div class="d-flex align-items-center gap-1">
+                      <i class="bi bi-door-open text-info"></i>
+                      {% if c.bed %}
+                        <span class="fw-semibold text-dark">Bed {{ c.bed.bed_code }}</span>
+                        <span class="badge bg-light text-secondary border py-0 px-1">{{ c.bed.bed_type }}</span>
+                      {% else %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-0 px-1">Bed Needed</span>
+                      {% endif %}
+                    </div>
+
+                    <!-- Ambulance -->
+                    {% if c.ambulance %}
+                    <div class="d-flex align-items-center gap-1">
+                      <i class="bi bi-truck text-danger"></i>
+                      <span class="fw-semibold text-dark">{{ c.ambulance.vehicle_id or c.ambulance.name }}</span>
+                      <span class="text-muted small">(Dispatched)</span>
+                    </div>
+                    {% endif %}
+                  </div>
+                </td>
+
+                <!-- Match State Badge -->
+                <td>
+                  {% if c.doctor and c.bed %}
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" style="font-size: 0.74rem;">
+                      <i class="bi bi-check2-circle me-1"></i> Allocated
+                    </span>
+                  {% else %}
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1" style="font-size: 0.74rem;">
+                      <i class="bi bi-exclamation-triangle-fill me-1"></i> Pending
+                    </span>
+                  {% endif %}
+                </td>
+
+                <!-- Action Button -->
+                <td class="text-end">
+                  <div class="d-inline-flex align-items-center gap-1 justify-content-end">
+                    <form method="POST" class="d-inline m-0">
+                      <input type="hidden" name="case_id" value="{{ c.id }}">
+                      <input type="hidden" name="mode" value="auto">
+                      {% if not c.doctor or not c.bed %}
+                        <button type="submit" class="btn-allocate-magic" title="One-click AI smart allocation">
+                          <i class="bi bi-magic me-1"></i> Auto-Match
+                        </button>
+                      {% else %}
+                        <button type="submit" class="btn-reallocate" title="Re-match resources">
+                          <i class="bi bi-arrow-repeat me-1"></i> Re-Match
+                        </button>
+                      {% endif %}
+                    </form>
+
+                    <!-- Quick load into workbench button -->
+                    <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-2" style="font-size: 0.75rem;" title="Load into Manual Dispatch Workbench" onclick="loadCaseIntoWorkbench('{{ c.id }}')">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+
+                    {% if c.ambulance %}
+                      <a href="{{ url_for('track', case_code=c.case_code) }}" target="_blank" class="btn-radar-mini" title="Live Fleet Radar">
+                        <i class="bi bi-broadcast"></i>
+                      </a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-5">
+                  <i class="bi bi-clipboard2-check display-6 d-block mb-2 opacity-50"></i>
+                  <div class="fw-semibold">No active or incoming cases in queue</div>
+                  <div class="small">All registered cases are currently resolved or closed.</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Interactive Dispatch & Resource Override Workbench (Right Panel - Replaces Static Rules) -->
+    <div class="col-lg-5 col-xl-4">
+      <div class="content-card h-100">
+        <div class="admin-card-header">
+          <div class="admin-card-header-left">
+            <div class="admin-card-icon"><i class="bi bi-sliders"></i></div>
+            <div>
+              <h5>Dispatch &amp; Override Workbench</h5>
+              <p>Manual resource pairing & direct triage control</p>
+            </div>
+          </div>
+          <span class="badge bg-light text-primary border small">Live Control</span>
+        </div>
+
+        <div class="card-body p-3">
+          {% if cases %}
+          <form method="POST" id="workbenchForm">
+            <!-- Hidden mode flag: manual vs auto -->
+            <input type="hidden" name="mode" id="workbenchMode" value="manual">
+
+            <!-- 1. Select Target Case -->
+            <div class="mb-3">
+              <label class="workbench-label"><i class="bi bi-person-fill text-primary me-1"></i> Target Patient Case</label>
+              <select name="case_id" id="wbCaseSelect" class="form-select workbench-select fw-bold" onchange="onWorkbenchCaseChange()">
+                {% for c in cases %}
+                <option value="{{ c.id }}" 
+                        data-code="{{ c.case_code }}"
+                        data-name="{{ c.patient_name }}"
+                        data-age="{{ c.age }}"
+                        data-priority="{{ c.priority }}"
+                        data-condition="{{ c.condition }}"
+                        data-bed="{{ c.assigned_bed_id or '' }}"
+                        data-doc="{{ c.assigned_doctor_id or '' }}"
+                        data-amb="{{ c.assigned_ambulance_id or '' }}"
+                        {% if loop.first %}selected{% endif %}>
+                  {{ c.case_code }} — {{ c.patient_name }} ({{ c.priority }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Active Case Snapshot Strip -->
+            <div class="p-2 px-3 rounded-2 mb-3 bg-light border" id="wbCaseSnapshot" style="font-size: 0.78rem;">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="fw-bold text-dark" id="wbSnapName">Patient</span>
+                <span class="priority-pill" id="wbSnapPriority">Priority</span>
+              </div>
+              <div class="text-muted small text-truncate" id="wbSnapCondition">Condition note</div>
+            </div>
+
+            <!-- 2. Assign Doctor -->
+            <div class="mb-3">
+              <label class="workbench-label"><i class="bi bi-person-badge text-primary me-1"></i> Assign Doctor</label>
+              <select name="doctor_id" id="wbDocSelect" class="form-select workbench-select">
+                <option value="">-- No Doctor Assigned --</option>
+                {% for d in doctors %}
+                <option value="{{ d.id }}" {% if d.status != 'Available' %}class="text-muted"{% endif %}>
+                  {% if d.status == 'Available' %}🟢{% else %}🔴{% endif %} 
+                  {{ d.name }} ({{ d.specialty or 'Physician' }}) — {{ d.status }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- 3. Assign Bed -->
+            <div class="mb-3">
+              <label class="workbench-label"><i class="bi bi-door-open text-info me-1"></i> Assign Hospital Bed</label>
+              <select name="bed_id" id="wbBedSelect" class="form-select workbench-select">
+                <option value="">-- No Bed Assigned --</option>
+                {% for b in beds %}
+                <option value="{{ b.id }}" {% if b.status != 'Available' %}class="text-muted"{% endif %}>
+                  {% if b.status == 'Available' %}🟢{% else %}🔴{% endif %} 
+                  Bed {{ b.bed_code }} ({{ b.bed_type }}) — {{ b.status }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- 4. Assign Ambulance -->
+            <div class="mb-3">
+              <label class="workbench-label"><i class="bi bi-truck text-danger me-1"></i> Dispatch Ambulance</label>
+              <select name="ambulance_id" id="wbAmbSelect" class="form-select workbench-select">
+                <option value="">-- No Ambulance / Patient Already On-Site --</option>
+                {% for a in ambulances %}
+                <option value="{{ a.id }}" {% if a.status != 'Available' %}class="text-muted"{% endif %}>
+                  {% if a.status == 'Available' %}🟢{% else %}🔵{% endif %} 
+                  {{ a.vehicle_id or a.name }} ({{ a.vehicle_type }}) — {{ a.status }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Action Trigger Buttons -->
+            <div class="d-flex flex-column gap-2 pt-2">
+              <button type="submit" onclick="document.getElementById('workbenchMode').value='manual';" class="btn btn-primary w-100 fw-bold py-2" style="font-size: 0.85rem; background: linear-gradient(135deg, #102146 0%, #1F3971 100%); border: none;">
+                <i class="bi bi-send-check-fill me-1"></i> Apply Manual Dispatch
+              </button>
+              
+              <button type="submit" onclick="document.getElementById('workbenchMode').value='auto';" class="btn btn-outline-primary w-100 fw-semibold py-2" style="font-size: 0.82rem;">
+                <i class="bi bi-magic me-1"></i> Run AI Auto-Match for This Case
+              </button>
+            </div>
+
+          </form>
+          {% else %}
+          <div class="text-center text-muted py-5">
+            <i class="bi bi-check2-all display-6 d-block mb-2 text-success opacity-75"></i>
+            <div class="fw-semibold">Queue Clear</div>
+            <div class="small">No active cases requiring dispatch or resource allocation.</div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ================= FOOTER ================= -->
 <footer class="site-footer">
-  <div class="container text-center">
-    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03</p>
-    <p class="mb-0 powered-by">Powered by <strong>Musafir Devs</strong></p>
+  <div class="container-fluid px-4 text-center">
+    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03 · Powered by <strong>Musafir Devs</strong></p>
   </div>
 </footer>
 {% endblock %}
@@ -207,5 +724,41 @@
   document.getElementById('mobileSidebarClose')?.addEventListener('click', e => { e.preventDefault(); closeSidebar(); });
   sidebarOverlay?.addEventListener('click', closeSidebar);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+  /* ===== Interactive Workbench Auto-Sync ===== */
+  function onWorkbenchCaseChange() {
+    const sel = document.getElementById('wbCaseSelect');
+    if (!sel || !sel.options.length) return;
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt) return;
+
+    // Update snapshot card
+    document.getElementById('wbSnapName').textContent = `${opt.dataset.code}: ${opt.dataset.name} (${opt.dataset.age} yrs)`;
+    const prioSpan = document.getElementById('wbSnapPriority');
+    prioSpan.textContent = opt.dataset.priority;
+    prioSpan.className = 'priority-pill priority-pill-' + (opt.dataset.priority || 'medium').toLowerCase();
+    document.getElementById('wbSnapCondition').textContent = opt.dataset.condition || 'No specific clinical symptoms noted';
+
+    // Auto-select current resource assignments in dropdowns
+    document.getElementById('wbDocSelect').value = opt.dataset.doc || '';
+    document.getElementById('wbBedSelect').value = opt.dataset.bed || '';
+    document.getElementById('wbAmbSelect').value = opt.dataset.amb || '';
+  }
+
+  function loadCaseIntoWorkbench(caseId) {
+    const sel = document.getElementById('wbCaseSelect');
+    if (!sel) return;
+    sel.value = caseId;
+    onWorkbenchCaseChange();
+    // Smooth scroll to workbench on mobile
+    if (window.innerWidth < 992) {
+      document.getElementById('workbenchForm')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  // Initialize workbench on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    onWorkbenchCaseChange();
+  });
 </script>
 {% endblock %}

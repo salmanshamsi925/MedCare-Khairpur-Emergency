@@ -296,25 +296,67 @@
     border: 1px solid #fecaca;
   }
 
-  /* Close Case Button */
-  .btn-close-case {
+  /* Action Buttons (View, Close, Delete) */
+  .btn-action-view {
+    background: #eff6ff;
+    border: 1.5px solid #bfdbfe;
+    color: #1d4ed8;
+    border-radius: 8px;
+    padding: 5px 11px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.18s ease;
+  }
+  .btn-action-view:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  .btn-action-close {
     background: #ecfdf5;
-    border: 1px solid #a7f3d0;
+    border: 1.5px solid #a7f3d0;
     color: #065f46;
-    border-radius: 20px;
-    padding: 4px 12px;
+    border-radius: 8px;
+    padding: 5px 10px;
     font-size: 0.78rem;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
   }
-  .btn-close-case:hover {
+  .btn-action-close:hover {
     background: #10b981;
     color: #ffffff;
     border-color: #10b981;
+    transform: translateY(-1px);
+  }
+
+  .btn-action-delete {
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    color: #dc2626;
+    border-radius: 8px;
+    padding: 5px 9px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.18s ease;
+  }
+  .btn-action-delete:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
     transform: translateY(-1px);
   }
 
@@ -327,16 +369,118 @@
     color: #334155;
   }
 
+  /* Executive Topbar */
+  .executive-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--adm-border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+  }
+  .topbar-left { display: flex; flex-direction: column; gap: 3px; }
+  .topbar-title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .topbar-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #102146;
+    margin: 0;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .topbar-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .live-dot-pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+  }
+  .topbar-sub { font-size: 0.82rem; color: #64748b; margin: 0; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .btn-topbar-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.22s ease;
+  }
+  .btn-radar {
+    background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(229, 57, 53, 0.25);
+  }
+  .btn-radar:hover { color: #ffffff; transform: translateY(-1px); }
+  .btn-allocate {
+    background: #ffffff;
+    color: #1F3971;
+    border: 1.5px solid var(--adm-border);
+  }
+  .btn-allocate:hover { background: #f8fafc; color: #1F3971; transform: translateY(-1px); }
+
+  .dashboard-main-content {
+    padding: 20px 24px 36px;
+    flex: 1;
+  }
+
+  /* Fit-to-screen responsive cases table (No horizontal scrollbar) */
+  .cases-scroll-wrap {
+    width: 100%;
+    overflow-x: hidden;
+  }
+  .table-modern {
+    width: 100%;
+    table-layout: auto;
+    margin-bottom: 0;
+  }
+  .table-modern th, .table-modern td {
+    padding: 13px 14px !important;
+    font-size: 0.88rem;
+    vertical-align: middle;
+  }
+
   /* Sticky Footer Reset */
   .site-footer {
     margin-top: auto !important;
     margin-bottom: 0 !important;
+    padding: 16px 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    border-top: 1px solid var(--adm-border);
+    background: #ffffff;
   }
 
   @media (max-width: 767px) {
+    .executive-topbar { padding: 14px 16px; }
+    .dashboard-main-content { padding: 14px 16px 28px; }
     .admin-card-header { padding: 14px 16px; flex-wrap: wrap; }
     .table-modern { font-size: 0.82rem; }
     .register-form { padding: 16px 14px; }
+    .topbar-right { width: 100%; }
+    .btn-topbar-action { flex: 1; justify-content: center; }
   }
 </style>
 {% endblock %}
@@ -344,30 +488,37 @@
 {% block body %}
 {% include 'admin/_nav.html' %}
 
-<!-- ================= PAGE HERO ================= -->
-<div class="about-hero-area about-hero-small">
-  <div class="about-hero-bg"></div>
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-lg-8 col-md-12">
-        <div class="about-hero-content">
-          <h2 class="about-hero-title" style="font-size: 32px; margin-bottom: 8px;">
-            <i class="bi bi-clipboard2-pulse me-2"></i>Emergency Cases
-          </h2>
-          <p class="about-hero-text" style="margin-bottom: 0;">
-            Register, filter and manage all emergency cases in Khairpur
-          </p>
-        </div>
-      </div>
-      <div class="col-lg-4 d-none d-lg-block text-end">
-        <div style="font-size: 4rem; opacity: 0.22; line-height: 1;">📋</div>
-      </div>
+<!-- ================= EXECUTIVE TOPBAR ================= -->
+<header class="executive-topbar">
+  <div class="topbar-left">
+    <div class="topbar-title-row">
+      <h1 class="topbar-title">
+        <i class="bi bi-clipboard2-pulse text-danger"></i>
+        <span>Emergency Cases</span>
+      </h1>
+      <span class="topbar-status-chip">
+        <span class="live-dot-pulse"></span>
+        <span>{{ cases|length }} Registered</span>
+      </span>
     </div>
+    <p class="topbar-sub">
+      Live triage, patient intake and emergency case resolution for Khairpur
+    </p>
   </div>
-</div>
+  <div class="topbar-right">
+    <a href="{{ url_for('admin_allocate') }}" class="btn-topbar-action btn-allocate">
+      <i class="bi bi-magic text-warning"></i>
+      <span>Smart Allocate</span>
+    </a>
+    <a href="{{ url_for('admin_track') }}" class="btn-topbar-action btn-radar">
+      <i class="bi bi-broadcast"></i>
+      <span>Live Fleet Radar</span>
+    </a>
+  </div>
+</header>
 
 <!-- ================= CONTENT ================= -->
-<div class="container section-padding" style="padding-top: 32px; padding-bottom: 50px;">
+<main class="dashboard-main-content">
   
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
@@ -378,205 +529,371 @@
     {% endfor %}
   {% endwith %}
 
-  <div class="row g-3">
-    
-    <!-- 1. Register New Case (Left Form) -->
-    <div class="col-lg-4">
-      <div class="content-card">
-        <div class="admin-card-header">
-          <div class="admin-card-header-left">
-            <div class="admin-card-icon"><i class="bi bi-plus-circle"></i></div>
-            <div>
-              <h5>Register New Case</h5>
-              <p>Manual intake by staff</p>
-            </div>
+  <!-- 1. Register New Case (Top Panel) -->
+  <div class="content-card mb-4">
+    <div class="admin-card-header">
+      <div class="admin-card-header-left">
+        <div class="admin-card-icon"><i class="bi bi-person-plus-fill"></i></div>
+        <div>
+          <h5>Register New Emergency Case</h5>
+          <p>Manual patient intake and rapid triage protocol for Khairpur</p>
+        </div>
+      </div>
+      <span class="badge bg-light text-primary border px-3 py-2 fw-semibold d-none d-sm-inline-flex align-items-center">
+        <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Rapid Intake Console
+      </span>
+    </div>
+
+    <div class="card-body p-3 p-lg-4">
+      <form method="POST">
+        <input type="hidden" name="action" value="add">
+        
+        <!-- Row 1: Patient Demographics & Urgency -->
+        <div class="row g-3 mb-3">
+          <div class="col-lg-3 col-md-6">
+            <label class="form-label"><i class="bi bi-person me-1 text-primary"></i> Patient Name</label>
+            <input type="text" name="patient_name" class="form-control" placeholder="Enter patient full name" required>
+          </div>
+          <div class="col-lg-2 col-md-3 col-6">
+            <label class="form-label"><i class="bi bi-calendar3 me-1 text-primary"></i> Age</label>
+            <input type="number" name="age" class="form-control" min="0" max="120" placeholder="e.g. 45" required>
+          </div>
+          <div class="col-lg-2 col-md-3 col-6">
+            <label class="form-label"><i class="bi bi-shield-exclamation me-1 text-danger"></i> Priority</label>
+            <select name="priority" class="form-select fw-semibold" required>
+              <option value="Critical">🔴 Critical (Immediate)</option>
+              <option value="High">🟠 High (Urgent)</option>
+              <option value="Medium" selected>🟡 Medium (Prompt)</option>
+              <option value="Low">🟢 Low (Standard)</option>
+            </select>
+          </div>
+          <div class="col-lg-5 col-md-12">
+            <label class="form-label"><i class="bi bi-heart-pulse me-1 text-danger"></i> Condition / Urgency</label>
+            <input type="text" name="condition" class="form-control" placeholder="Describe symptoms or clinical urgency (e.g. Severe chest pain, trauma...)" required>
           </div>
         </div>
-        
-        <div class="register-form">
-          <form method="POST">
-            <input type="hidden" name="action" value="add">
-            
-            <div class="mb-3">
-              <label class="form-label">Patient Name</label>
-              <input type="text" name="patient_name" class="form-control" placeholder="Enter patient full name" required>
-            </div>
 
-            <div class="row g-2 mb-3">
-              <div class="col-6">
-                <label class="form-label">Age</label>
-                <input type="number" name="age" class="form-control" min="0" max="120" placeholder="e.g. 45" required>
-              </div>
-              <div class="col-6">
-                <label class="form-label">Priority</label>
-                <select name="priority" class="form-select" required>
-                  <option value="Critical">Critical</option>
-                  <option value="High">High</option>
-                  <option value="Medium" selected>Medium</option>
-                  <option value="Low">Low</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Condition</label>
-              <textarea name="condition" class="form-control" rows="2" placeholder="Describe symptoms or medical urgency..." required></textarea>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Address <span class="text-muted fw-normal text-lowercase">(optional)</span></label>
-              <input type="text" name="address" class="form-control" placeholder="Area, street or landmark in Khairpur...">
-            </div>
-
-            <div class="row g-2 mb-3">
-              <div class="col-6">
-                <label class="form-label">Lat <span class="text-muted fw-normal text-lowercase">(opt)</span></label>
-                <input type="text" name="lat" class="form-control" placeholder="27.53">
-              </div>
-              <div class="col-6">
-                <label class="form-label">Lng <span class="text-muted fw-normal text-lowercase">(opt)</span></label>
-                <input type="text" name="lng" class="form-control" placeholder="68.76">
-              </div>
-            </div>
-
-            <button type="submit" class="btn-admin-primary mt-2">
-              <i class="bi bi-plus-lg me-2"></i>Register Case
+        <!-- Row 2: Location & Intake Submission -->
+        <div class="row g-3 align-items-end">
+          <div class="col-lg-5 col-md-6">
+            <label class="form-label"><i class="bi bi-geo-alt me-1 text-secondary"></i> Address / Landmark <span class="text-muted fw-normal text-lowercase">(optional)</span></label>
+            <input type="text" name="address" class="form-control" placeholder="Area, street or landmark in Khairpur...">
+          </div>
+          <div class="col-lg-2 col-md-3 col-6">
+            <label class="form-label"><i class="bi bi-compass me-1 text-secondary"></i> Lat <span class="text-muted fw-normal text-lowercase">(opt)</span></label>
+            <input type="text" name="lat" class="form-control" placeholder="27.5300">
+          </div>
+          <div class="col-lg-2 col-md-3 col-6">
+            <label class="form-label"><i class="bi bi-compass me-1 text-secondary"></i> Lng <span class="text-muted fw-normal text-lowercase">(opt)</span></label>
+            <input type="text" name="lng" class="form-control" placeholder="68.7600">
+          </div>
+          <div class="col-lg-3 col-md-12">
+            <button type="submit" class="btn-admin-primary">
+              <i class="bi bi-plus-circle-fill me-2"></i> Register Case
             </button>
-          </form>
+          </div>
         </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. All Cases Table (Bottom Full-Width Panel) -->
+  <div class="content-card">
+    <div class="admin-card-header">
+      <div class="admin-card-header-left">
+        <div class="admin-card-icon"><i class="bi bi-journal-medical"></i></div>
+        <div>
+          <h5>All Registered Cases</h5>
+          <p>{{ cases|length }} total case(s) on record</p>
+        </div>
+      </div>
+      
+      <div class="d-flex align-items-center gap-2">
+        <label class="text-white-50 small mb-0 d-none d-md-inline">Filter Priority:</label>
+        <form class="d-inline">
+          <select name="priority" class="filter-select" onchange="this.form.submit()">
+            <option value="all" {% if priority_filter=='all' %}selected{% endif %}>All Priorities</option>
+            <option value="Critical" {% if priority_filter=='Critical' %}selected{% endif %}>Critical</option>
+            <option value="High" {% if priority_filter=='High' %}selected{% endif %}>High</option>
+            <option value="Medium" {% if priority_filter=='Medium' %}selected{% endif %}>Medium</option>
+            <option value="Low" {% if priority_filter=='Low' %}selected{% endif %}>Low</option>
+          </select>
+        </form>
       </div>
     </div>
 
-    <!-- 2. All Cases Table (Right Table) -->
-    <div class="col-lg-8">
-      <div class="content-card">
-        <div class="admin-card-header">
-          <div class="admin-card-header-left">
-            <div class="admin-card-icon"><i class="bi bi-journal-medical"></i></div>
-            <div>
-              <h5>All Cases</h5>
-              <p>{{ cases|length }} registered case(s)</p>
-            </div>
-          </div>
-          
-          <form class="d-inline">
-            <select name="priority" class="filter-select" onchange="this.form.submit()">
-              <option value="all" {% if priority_filter=='all' %}selected{% endif %}>All Priorities</option>
-              <option value="Critical" {% if priority_filter=='Critical' %}selected{% endif %}>Critical</option>
-              <option value="High" {% if priority_filter=='High' %}selected{% endif %}>High</option>
-              <option value="Medium" {% if priority_filter=='Medium' %}selected{% endif %}>Medium</option>
-              <option value="Low" {% if priority_filter=='Low' %}selected{% endif %}>Low</option>
-            </select>
-          </form>
-        </div>
+    <div class="card-body p-0">
+      <div class="cases-scroll-wrap">
+        <table class="table table-modern align-middle mb-0">
+          <thead>
+            <tr>
+              <th style="width: 10%;">Code</th>
+              <th style="width: 25%;">Patient</th>
+              <th style="width: 14%;">Priority</th>
+              <th style="width: 14%;">Status</th>
+              <th style="width: 17%;">Doctor</th>
+              <th style="width: 20%;" class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in cases %}
+            <tr>
+              <td>
+                <span class="case-code-badge">{{ c.case_code }}</span>
+              </td>
+              <td>
+                <div class="patient-cell">
+                  <span class="patient-avatar">{{ c.patient_name[:2].upper() }}</span>
+                  <div>
+                    <div class="patient-name">{{ c.patient_name }}</div>
+                    <div class="small text-muted">{{ c.age }} yrs</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                {% if c.priority == 'Critical' %}
+                  <span class="priority-pill priority-pill-critical">
+                    <span class="priority-dot dot-critical"></span>Critical
+                  </span>
+                {% elif c.priority == 'High' %}
+                  <span class="priority-pill priority-pill-high">
+                    <span class="priority-dot dot-high"></span>High
+                  </span>
+                {% elif c.priority == 'Medium' %}
+                  <span class="priority-pill priority-pill-medium">
+                    <span class="priority-dot dot-medium"></span>Medium
+                  </span>
+                {% else %}
+                  <span class="priority-pill priority-pill-low">
+                    <span class="priority-dot dot-low"></span>Low
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                {% if c.status == 'Incoming' %}
+                  <span class="status-pill status-pill-incoming"><i class="bi bi-clock-history me-1"></i>Incoming</span>
+                {% elif c.status == 'Dispatched' %}
+                  <span class="status-pill status-pill-dispatched"><i class="bi bi-send-fill me-1"></i>Dispatched</span>
+                {% elif c.status == 'Closed' %}
+                  <span class="status-pill status-pill-closed"><i class="bi bi-check-circle-fill text-success me-1"></i>Closed</span>
+                {% else %}
+                  <span class="status-pill status-pill-active"><span class="status-dot-active me-1"></span>Active</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if c.doctor %}
+                  <div class="doctor-cell">
+                    <i class="bi bi-person-badge text-primary fs-5"></i>
+                    <div>
+                      <span class="fw-semibold text-dark">{{ c.doctor.name }}</span>
+                    </div>
+                  </div>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <div class="d-inline-flex align-items-center gap-1 justify-content-end">
+                  <!-- 1. View Button -->
+                  <button type="button" class="btn-action-view" data-bs-toggle="modal" data-bs-target="#caseModal{{ c.id }}" title="View Complete Details">
+                    <i class="bi bi-eye"></i> View
+                  </button>
 
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-modern mb-0">
-              <thead>
-                <tr>
-                  <th>Code</th>
-                  <th>Patient</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Assigned Doctor</th>
-                  <th class="text-end">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for c in cases %}
-                <tr>
-                  <td>
-                    <span class="case-code-badge">{{ c.case_code }}</span>
-                  </td>
-                  <td>
-                    <div class="patient-cell">
-                      <span class="patient-avatar">{{ c.patient_name[:2].upper() }}</span>
+                  <!-- 2. Close Button (if active) -->
+                  {% if c.status != 'Closed' %}
+                  <form method="POST" class="d-inline" onsubmit="return confirm('Close case {{ c.case_code }}? Bed, doctor and ambulance will be freed.')">
+                    <input type="hidden" name="action" value="close">
+                    <input type="hidden" name="case_id" value="{{ c.id }}">
+                    <button type="submit" class="btn-action-close" title="Close Case">
+                      <i class="bi bi-check2"></i> Close
+                    </button>
+                  </form>
+                  {% endif %}
+
+                  <!-- 3. Delete Button -->
+                  <form method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to permanently delete case {{ c.case_code }}? Resources will be freed.')">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="case_id" value="{{ c.id }}">
+                    <button type="submit" class="btn-action-delete" title="Permanently Delete Case">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Compact Executive Details Modal -->
+            <div class="modal fade" id="caseModal{{ c.id }}" tabindex="-1" aria-labelledby="caseModalLabel{{ c.id }}" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+                <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden">
+                  
+                  <!-- Modal Header (Compact Navy) -->
+                  <div class="modal-header text-white" style="background: linear-gradient(135deg, #102146 0%, #1F3971 100%); padding: 12px 18px;">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="case-code-badge" style="background: rgba(255,255,255,0.18); color: #fff; border-color: rgba(255,255,255,0.3); font-size: 0.78rem; padding: 2px 8px;">
+                        {{ c.case_code }}
+                      </span>
                       <div>
-                        <div class="patient-name">{{ c.patient_name }}</div>
-                        <div class="small text-muted">{{ c.age }} yrs</div>
+                        <h6 class="modal-title fw-bold mb-0 text-white" id="caseModalLabel{{ c.id }}" style="font-size: 0.96rem;">
+                          {{ c.patient_name }} <span class="fw-normal opacity-75">({{ c.age }} yrs)</span>
+                        </h6>
+                        <small class="text-white-50" style="font-size: 0.7rem;">
+                          <i class="bi bi-clock me-1"></i>{{ c.registered_at.strftime('%d %b %Y, %I:%M %p') if c.registered_at else 'Active Case' }}
+                        </small>
                       </div>
                     </div>
-                  </td>
-                  <td>
-                    {% if c.priority == 'Critical' %}
-                      <span class="priority-pill priority-pill-critical">
-                        <span class="priority-dot dot-critical"></span>Critical
-                      </span>
-                    {% elif c.priority == 'High' %}
-                      <span class="priority-pill priority-pill-high">
-                        <span class="priority-dot dot-high"></span>High
-                      </span>
-                    {% elif c.priority == 'Medium' %}
-                      <span class="priority-pill priority-pill-medium">
-                        <span class="priority-dot dot-medium"></span>Medium
-                      </span>
-                    {% else %}
-                      <span class="priority-pill priority-pill-low">
-                        <span class="priority-dot dot-low"></span>Low
-                      </span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if c.status == 'Incoming' %}
-                      <span class="status-pill status-pill-incoming"><i class="bi bi-clock-history me-1"></i>Incoming</span>
-                    {% elif c.status == 'Dispatched' %}
-                      <span class="status-pill status-pill-dispatched"><i class="bi bi-send-fill me-1"></i>Dispatched</span>
-                    {% elif c.status == 'Closed' %}
-                      <span class="status-pill status-pill-closed"><i class="bi bi-check-circle-fill text-success me-1"></i>Closed</span>
-                    {% else %}
-                      <span class="status-pill status-pill-active"><span class="status-dot-active me-1"></span>Active</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if c.doctor %}
-                      <div class="doctor-cell">
-                        <i class="bi bi-person-badge text-primary"></i>
-                        <span>{{ c.doctor.name }}</span>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.75rem;"></button>
+                  </div>
+
+                  <!-- Modal Body (Compact & Smart) -->
+                  <div class="modal-body p-3" style="background: #f8fafc;">
+                    
+                    <!-- 1. Triage Strip (Priority & Status) -->
+                    <div class="d-flex align-items-center justify-content-between p-2 px-3 rounded-2 mb-2 bg-white border" style="font-size: 0.78rem;">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted fw-bold">PRIORITY:</span>
+                        {% if c.priority == 'Critical' %}
+                          <span class="priority-pill priority-pill-critical" style="padding: 2px 8px; font-size: 0.72rem;"><span class="priority-dot dot-critical"></span>Critical</span>
+                        {% elif c.priority == 'High' %}
+                          <span class="priority-pill priority-pill-high" style="padding: 2px 8px; font-size: 0.72rem;"><span class="priority-dot dot-high"></span>High</span>
+                        {% elif c.priority == 'Medium' %}
+                          <span class="priority-pill priority-pill-medium" style="padding: 2px 8px; font-size: 0.72rem;"><span class="priority-dot dot-medium"></span>Medium</span>
+                        {% else %}
+                          <span class="priority-pill priority-pill-low" style="padding: 2px 8px; font-size: 0.72rem;"><span class="priority-dot dot-low"></span>Low</span>
+                        {% endif %}
                       </div>
-                    {% else %}
-                      <span class="text-muted">—</span>
-                    {% endif %}
-                  </td>
-                  <td class="text-end">
-                    {% if c.status != 'Closed' %}
-                    <form method="POST" class="d-inline" onsubmit="return confirm('Close this case? Bed, doctor and ambulance will be freed.')">
-                      <input type="hidden" name="action" value="close">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted fw-bold">STATUS:</span>
+                        {% if c.status == 'Incoming' %}
+                          <span class="status-pill status-pill-incoming" style="padding: 2px 8px; font-size: 0.72rem;"><i class="bi bi-clock-history me-1"></i>Incoming</span>
+                        {% elif c.status == 'Dispatched' %}
+                          <span class="status-pill status-pill-dispatched" style="padding: 2px 8px; font-size: 0.72rem;"><i class="bi bi-send-fill me-1"></i>Dispatched</span>
+                        {% elif c.status == 'Closed' %}
+                          <span class="status-pill status-pill-closed" style="padding: 2px 8px; font-size: 0.72rem;"><i class="bi bi-check-circle-fill text-success me-1"></i>Closed</span>
+                        {% else %}
+                          <span class="status-pill status-pill-active" style="padding: 2px 8px; font-size: 0.72rem;"><span class="status-dot-active me-1"></span>Active</span>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <!-- 2. Clinical Condition Callout -->
+                    <div class="p-2 px-3 rounded-2 mb-2 bg-white border">
+                      <div class="text-muted fw-bold text-uppercase mb-1" style="font-size: 0.68rem; letter-spacing: 0.04em;">
+                        <i class="bi bi-heart-pulse text-danger me-1"></i> Symptoms & Clinical Condition
+                      </div>
+                      <div class="fw-semibold text-dark p-2 rounded-1" style="background: #f1f5f9; font-size: 0.83rem; line-height: 1.4;">
+                        {{ c.condition or 'No clinical condition recorded.' }}
+                      </div>
+                    </div>
+
+                    <!-- 3. Key Operational Details (Resources + Location in Clean Cards) -->
+                    <div class="row g-2 mb-2">
+                      <!-- Allocated Resources -->
+                      <div class="col-6">
+                        <div class="p-2 px-3 rounded-2 bg-white border h-100" style="font-size: 0.78rem;">
+                          <div class="text-muted fw-bold text-uppercase mb-2" style="font-size: 0.68rem; letter-spacing: 0.04em;">
+                            <i class="bi bi-hospital text-primary me-1"></i> Resources
+                          </div>
+                          <div class="d-flex flex-column gap-1">
+                            <div class="d-flex justify-content-between">
+                              <span class="text-muted">Doctor:</span>
+                              <span class="fw-semibold text-dark text-truncate text-end ps-1" style="max-width: 130px;">
+                                {% if c.doctor %}{{ c.doctor.name }}{% else %}<span class="text-muted fw-normal">—</span>{% endif %}
+                              </span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                              <span class="text-muted">Bed:</span>
+                              <span class="fw-semibold text-dark">
+                                {% if c.bed %}{{ c.bed.bed_code }} ({{ c.bed.bed_type }}){% else %}<span class="text-muted fw-normal">—</span>{% endif %}
+                              </span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                              <span class="text-muted">Ambulance:</span>
+                              <span class="fw-semibold text-dark">
+                                {% if c.ambulance %}{{ c.ambulance.vehicle_id or c.ambulance.name }}{% else %}<span class="text-muted fw-normal">—</span>{% endif %}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Location & Coordinates -->
+                      <div class="col-6">
+                        <div class="p-2 px-3 rounded-2 bg-white border h-100" style="font-size: 0.78rem;">
+                          <div class="text-muted fw-bold text-uppercase mb-2" style="font-size: 0.68rem; letter-spacing: 0.04em;">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i> Location
+                          </div>
+                          <div class="d-flex flex-column gap-1">
+                            <div class="text-truncate fw-semibold text-dark" title="{{ c.patient_address or 'Khairpur Central Zone' }}">
+                              {{ c.patient_address or 'Khairpur Central Zone' }}
+                            </div>
+                            <div class="text-muted small">
+                              {% if c.patient_lat and c.patient_lng %}
+                                <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.68rem;">{{ c.patient_lat|round(4) }}, {{ c.patient_lng|round(4) }}</span>
+                              {% else %}
+                                <span class="fst-italic opacity-75">No GPS data</span>
+                              {% endif %}
+                            </div>
+                            <div class="pt-1">
+                              <a href="{{ url_for('track', case_code=c.case_code) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-2 fw-semibold w-100" style="font-size: 0.72rem; line-height: 22px;">
+                                <i class="bi bi-broadcast me-1"></i> Live Radar
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- Modal Footer (Compact) -->
+                  <div class="modal-footer bg-white border-top py-2 px-3 d-flex justify-content-between">
+                    <form method="POST" class="m-0" onsubmit="return confirm('Permanently delete case {{ c.case_code }}? This cannot be undone.')">
+                      <input type="hidden" name="action" value="delete">
                       <input type="hidden" name="case_id" value="{{ c.id }}">
-                      <button type="submit" class="btn-close-case">
-                        <i class="bi bi-check2"></i> Close
+                      <button type="submit" class="btn btn-outline-danger btn-sm py-1 px-2 fw-semibold" style="font-size: 0.75rem;">
+                        <i class="bi bi-trash3 me-1"></i> Delete Case
                       </button>
                     </form>
-                    {% else %}
-                      <span class="text-muted small">—</span>
-                    {% endif %}
-                  </td>
-                </tr>
-                {% else %}
-                <tr>
-                  <td colspan="6" class="text-center text-muted py-5">
-                    <i class="bi bi-clipboard2-check display-6 d-block mb-2 opacity-50"></i>
-                    <div class="fw-semibold">No cases found</div>
-                    <div class="small">No cases registered under this priority filter.</div>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
+                    <div class="d-flex gap-2">
+                      {% if c.status != 'Closed' %}
+                      <form method="POST" class="m-0" onsubmit="return confirm('Close case {{ c.case_code }} and free resources?')">
+                        <input type="hidden" name="action" value="close">
+                        <input type="hidden" name="case_id" value="{{ c.id }}">
+                        <button type="submit" class="btn btn-success btn-sm py-1 px-3 fw-semibold" style="font-size: 0.75rem;">
+                          <i class="bi bi-check2 me-1"></i> Close Case
+                        </button>
+                      </form>
+                      {% endif %}
+                      <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.75rem;">Dismiss</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {% else %}
+            <tr>
+              <td colspan="6" class="text-center text-muted py-5">
+                <i class="bi bi-clipboard2-check display-6 d-block mb-2 opacity-50"></i>
+                <div class="fw-semibold">No cases found</div>
+                <div class="small">No cases registered under this priority filter.</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
-
   </div>
-</div>
+</main>
 
 <!-- ================= FOOTER ================= -->
 <footer class="site-footer">
-  <div class="container text-center">
-    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03</p>
-    <p class="mb-0 powered-by">Powered by <strong>Musafir Devs</strong></p>
+  <div class="container-fluid px-4 text-center">
+    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03 · Powered by <strong>Musafir Devs</strong></p>
   </div>
 </footer>
 {% endblock %}

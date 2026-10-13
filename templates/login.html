@@ -1,208 +1,714 @@
 {% extends "base.html" %}
-{% block title %}Login - MedCare Khairpur{% endblock %}
+{% block title %}Secure Staff & Admin Portal - MedCare Khairpur{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  .login-page {
+  :root {
+    --navy-deep: #0c1b38;
+    --navy-mid: #162a52;
+    --navy-brand: #1F3971;
+    --red-brand: #e53935;
+    --gold-brand: #FFAE27;
+    --green-live: #10b981;
+    --slate-border: #e2e8f0;
+    --slate-bg: #f8fafc;
+  }
+
+  body {
+    background: #f1f5f9;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .login-page-wrapper {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 16px;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(31, 57, 113, 0.08) 0, transparent 400px),
+      radial-gradient(circle at 90% 90%, rgba(229, 57, 53, 0.06) 0, transparent 400px),
+      #f1f5f9;
   }
-  .login-hero {
-    flex: 1;
+
+  .terminal-frame {
+    width: 100%;
+    max-width: 960px;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(12, 27, 56, 0.12), 0 4px 12px rgba(12, 27, 56, 0.06);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    min-height: 560px;
+    animation: terminalFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes terminalFadeIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.99); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* LEFT BRIEFING PANEL */
+  .terminal-briefing {
+    flex: 0 0 42%;
+    background: linear-gradient(145deg, var(--navy-deep) 0%, var(--navy-mid) 50%, var(--navy-brand) 100%);
+    color: #ffffff;
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .terminal-briefing::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 174, 39, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .briefing-top {
+    position: relative;
+    z-index: 2;
+  }
+
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--gold-brand);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    backdrop-filter: blur(4px);
+  }
+
+  .brand-badge .pulse-beacon {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green-live);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.35);
+    animation: beaconPulse 2s infinite;
+  }
+
+  @keyframes beaconPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+
+  .briefing-logo-wrap {
+    margin-bottom: 20px;
+  }
+
+  .briefing-logo-img {
+    height: 52px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    display: block;
+  }
+
+  .briefing-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+
+  .briefing-desc {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.5;
+    margin-bottom: 28px;
+  }
+
+  .briefing-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .metric-strip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 14px;
+    border-radius: 12px;
+    transition: background 0.2s ease;
+  }
+
+  .metric-strip:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .metric-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem;
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .metric-info h5 {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  .metric-info span {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  .briefing-bottom {
+    position: relative;
+    z-index: 2;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  /* RIGHT AUTH CONSOLE */
+  .terminal-console {
+    flex: 0 0 58%;
+    padding: 40px 42px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #ffffff;
+  }
+
+  .console-header {
+    margin-bottom: 22px;
+  }
+
+  .security-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--navy-brand);
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+  }
+
+  .console-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--navy-deep);
+    margin: 0 0 4px 0;
+  }
+
+  .console-sub {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 0;
+  }
+
+  /* ROLE TABS SELECTOR (HCI AFFORDANCE) */
+  .role-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 12px;
+    margin-bottom: 22px;
+  }
+
+  .role-tab-btn {
+    border: none;
+    background: transparent;
+    padding: 8px 6px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px 15px 60px;
-    background:
-      radial-gradient(circle at 12% 18%, rgba(255,174,39,0.06) 0 160px, transparent 161px),
-      radial-gradient(circle at 88% 78%, rgba(31,57,113,0.06) 0 180px, transparent 181px),
-      var(--bg);
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .login-card {
-    width: 100%;
-    max-width: 440px;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 16px 48px rgba(31,57,113,0.12);
+
+  .role-tab-btn:hover {
+    color: var(--navy-deep);
+    background: rgba(255, 255, 255, 0.6);
   }
-  .login-card-header {
+
+  .role-tab-btn.active {
     background: #ffffff;
-    border-bottom: 3px solid var(--red);
-    padding: 32px 24px 22px;
-    text-align: center;
-  }
-  .login-logo {
-    width: 210px; height: 63px;
-    object-fit: contain;
-    margin: 0 auto 6px;
-    display: block;
-  }
-  .login-card-header h4 {
-    margin: 0;
-    font-family: 'Montserrat', sans-serif;
+    color: var(--navy-brand);
+    box-shadow: 0 2px 8px rgba(12, 27, 56, 0.08);
     font-weight: 700;
-    font-size: 1.2rem;
-    color: #fff;
   }
-  .login-card-header p {
-    margin: 4px 0 0;
+
+  /* FORM STYLING */
+  .form-group-custom {
+    margin-bottom: 16px;
+  }
+
+  .form-label-custom {
     font-size: 0.8rem;
-    color: var(--muted);
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
-  .login-icon-badge {
-    width: 58px; height: 58px;
-    border-radius: 50%;
-    background: rgba(255,174,39,0.22);
-    color: var(--yellow);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem;
-    margin: 0 auto 14px;
+
+  .input-shell {
+    position: relative;
+    display: flex;
+    align-items: center;
   }
-  .login-body { padding: 30px 26px 24px; }
-  .login-body .form-label {
-    font-size: 0.83rem; font-weight: 600; color: var(--navy); margin-bottom: 6px;
+
+  .input-shell i.shell-icon {
+    position: absolute;
+    left: 14px;
+    color: #94a3b8;
+    font-size: 1rem;
+    pointer-events: none;
+    transition: color 0.2s ease;
   }
-  .login-body .form-control {
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-size: 0.93rem;
-    background: #fbfcfe;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
-  }
-  .login-body .form-control:focus {
-    border-color: var(--navy);
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(31,57,113,0.10);
-  }
-  .input-icon-group { position: relative; }
-  .input-icon-group i {
-    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-    color: var(--muted); font-size: 0.95rem; pointer-events: none;
-  }
-  .input-icon-group .form-control { padding-left: 42px; }
-  .btn-login {
+
+  .input-shell input {
     width: 100%;
-    background: var(--red);
-    color: #fff;
+    height: 46px;
+    border: 1.5px solid var(--slate-border);
+    border-radius: 10px;
+    padding: 0 42px 0 42px;
+    font-size: 0.92rem;
+    color: #0f172a;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+  }
+
+  .input-shell input:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: var(--navy-brand);
+    box-shadow: 0 0 0 3px rgba(31, 57, 113, 0.12);
+  }
+
+  .input-shell input:focus + i.shell-icon,
+  .input-shell input:focus ~ i.shell-icon {
+    color: var(--navy-brand);
+  }
+
+  .btn-pw-eye {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+  }
+
+  .btn-pw-eye:hover {
+    color: var(--navy-deep);
+  }
+
+  .btn-auth-submit {
+    width: 100%;
+    height: 48px;
+    background: linear-gradient(135deg, var(--navy-brand) 0%, var(--navy-deep) 100%);
+    color: #ffffff;
     border: none;
     border-radius: 10px;
-    padding: 14px 20px;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     cursor: pointer;
-    transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 4px 14px rgba(31, 57, 113, 0.25);
+    transition: all 0.25s ease;
+    margin-top: 6px;
   }
-  .btn-login:hover {
-    background: #c62828;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(229,57,53,0.35);
+
+  .btn-auth-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(31, 57, 113, 0.35);
+    background: linear-gradient(135deg, #162b58 0%, #09152b 100%);
   }
-  .btn-login:active { transform: translateY(0); }
-  .demo-box {
-    margin-top: 20px;
-    background: #f7f9fc;
-    border: 1px dashed var(--border);
-    border-radius: 10px;
-    padding: 14px 16px;
+
+  .btn-auth-submit:active {
+    transform: translateY(0);
+  }
+
+  /* QUICK ROLE CHIPS STRIP */
+  .quick-demo-strip {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--slate-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .quick-demo-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .quick-chips-group {
+    display: flex;
+    gap: 6px;
+  }
+
+  .quick-chip {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .quick-chip:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+  }
+
+  .console-footer-nav {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .back-home-link {
     font-size: 0.8rem;
-    color: var(--dark);
+    font-weight: 600;
+    color: #64748b;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease;
   }
-  .demo-box code {
-    background: #e8eefb; color: var(--navy);
-    padding: 1px 6px; border-radius: 6px; font-size: 0.78rem;
+
+  .back-home-link:hover {
+    color: var(--navy-brand);
   }
-  .demo-role {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+
+  .footer-meta-secure {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
-  .demo-role:last-child { margin-bottom: 0; }
-  .demo-chip {
-    width: 24px; height: 24px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.7rem; flex-shrink: 0;
-  }
-  @media (max-width: 400px) {
-    .login-body { padding: 20px 18px 18px; }
-    .login-card-header { padding: 24px 18px 20px; }
-    .login-logo { width: 150px; height: 45px; }
+
+  /* RESPONSIVE BREAKPOINT */
+  @media (max-width: 860px) {
+    .terminal-frame {
+      flex-direction: column;
+      max-width: 520px;
+      min-height: auto;
+    }
+    .terminal-briefing {
+      flex: 0 0 auto;
+      padding: 28px 24px;
+    }
+    .terminal-console {
+      flex: 0 0 auto;
+      padding: 28px 24px;
+    }
+    .briefing-metrics {
+      display: none;
+    }
+    .briefing-desc {
+      margin-bottom: 0;
+    }
+    .briefing-bottom {
+      display: none;
+    }
   }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="login-page">
-  <div class="login-hero">
-    <div class="login-card">
-      <div class="login-card-header">
-        <img src="{{ url_for('static', filename='img/logo101.png') }}" alt="MedCare Emergency Logo" class="login-logo"
-             onerror="this.style.display='none'">
-        <p>Emergency Resource Manager · Khairpur</p>
+<div class="login-page-wrapper">
+  <div class="terminal-frame">
+
+    <!-- LEFT OPERATIONS & TELEMETRY BRIEFING -->
+    <div class="terminal-briefing">
+      <div class="briefing-top">
+        <div class="brand-badge">
+          <span class="pulse-beacon"></span>
+          <span>Khairpur EOC · Live Telemetry</span>
+        </div>
+
+        <div class="briefing-logo-wrap">
+          <img src="{{ url_for('static', filename='img/logo101.png') }}"
+               alt="MedCare Khairpur Emergency Logo"
+               class="briefing-logo-img"
+               onerror="this.style.display='none'">
+        </div>
+
+        <h3 class="briefing-title">Emergency Resource Command Console</h3>
+        <p class="briefing-desc">
+          Official authenticated terminal for District Khairpur Emergency Operations, dynamic hospital bed allocation, and live GPS ambulance dispatch.
+        </p>
+
+        <div class="briefing-metrics">
+          <div class="metric-strip">
+            <div class="metric-icon"><i class="bi bi-shield-check text-warning"></i></div>
+            <div class="metric-info">
+              <h5>Role-Based Access Control</h5>
+              <span>Director Admin · Attending Doctor · Fleet Pilot</span>
+            </div>
+          </div>
+          <div class="metric-strip">
+            <div class="metric-icon" style="font-size:1.25rem;">🚑</div>
+            <div class="metric-info">
+              <h5>10-Unit Ambulance Fleet</h5>
+              <span>Real-Time GPS Tracking & Automated Transit States</span>
+            </div>
+          </div>
+          <div class="metric-strip">
+            <div class="metric-icon"><i class="bi bi-hospital text-info"></i></div>
+            <div class="metric-info">
+              <h5>5 Networked Hospital Hubs</h5>
+              <span>Live ICU, Emergency, and Isolation Capacity Sync</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="login-body">
+      <div class="briefing-bottom">
+        <span><i class="bi bi-lock-fill me-1"></i> AES-256 Session Shield</span>
+        <span>OpenHack 2026 · Team HT-03</span>
+      </div>
+    </div>
+
+    <!-- RIGHT AUTHENTICATION CONSOLE -->
+    <div class="terminal-console">
+      <div>
+        <div class="console-header">
+          <div class="security-tag">
+            <i class="bi bi-shield-lock-fill text-danger"></i> Command Authentication
+          </div>
+          <h2 class="console-title">Operator Sign In</h2>
+          <p class="console-sub">Select your operational role and authenticate to proceed.</p>
+        </div>
+
+        <!-- INTERACTIVE ROLE TABS -->
+        <div class="role-tabs" id="roleTabs">
+          <button type="button" class="role-tab-btn active" data-user="admin" data-pass="admin123" onclick="selectRoleTab(this)">
+            <i class="bi bi-shield-shaded text-primary"></i> Admin
+          </button>
+          <button type="button" class="role-tab-btn" data-user="drsara" data-pass="doctor123" onclick="selectRoleTab(this)">
+            <i class="bi bi-heart-pulse-fill text-danger"></i> Doctor
+          </button>
+          <button type="button" class="role-tab-btn" data-user="amb1" data-pass="amb123" onclick="selectRoleTab(this)">
+            <span style="font-size:1.05rem;">🚑</span> Fleet
+          </button>
+        </div>
+
+        <!-- FLASH MESSAGES -->
         {% with messages = get_flashed_messages(with_categories=true) %}
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }} py-2 small">{{ message }}</div>
-          {% endfor %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} py-2 px-3 small d-flex align-items-center gap-2 mb-3 rounded-3" role="alert">
+                <i class="bi bi-info-circle-fill"></i>
+                <div>{{ message }}</div>
+              </div>
+            {% endfor %}
+          {% endif %}
         {% endwith %}
 
-        <form method="POST">
-          <div class="mb-3">
-            <label class="form-label">Username</label>
-            <div class="input-icon-group">
-              <i class="bi bi-person"></i>
-              <input type="text" name="username" class="form-control" required
-                     placeholder="e.g. admin / drsara / amb1" autofocus>
+        <!-- AUTH FORM -->
+        <form method="POST" id="authForm" autocomplete="off">
+          <div class="form-group-custom">
+            <label class="form-label-custom" for="usernameInput">
+              <span>Operator ID / Username</span>
+              <span class="text-muted small" id="roleHintLabel" style="font-size:0.72rem;">Role: Administrator</span>
+            </label>
+            <div class="input-shell">
+              <i class="bi bi-person shell-icon"></i>
+              <input type="text"
+                     name="username"
+                     id="usernameInput"
+                     value="admin"
+                     required
+                     placeholder="e.g. admin"
+                     autofocus>
             </div>
           </div>
-          <div class="mb-4">
-            <label class="form-label">Password</label>
-            <div class="input-icon-group">
-              <i class="bi bi-lock"></i>
-              <input type="password" name="password" class="form-control" required placeholder="••••••••">
+
+          <div class="form-group-custom">
+            <label class="form-label-custom" for="passwordInput">
+              <span>Security Passkey</span>
+              <span class="text-muted small" style="font-size:0.72rem;">Encrypted</span>
+            </label>
+            <div class="input-shell">
+              <i class="bi bi-key shell-icon"></i>
+              <input type="password"
+                     name="password"
+                     id="passwordInput"
+                     value="admin123"
+                     required
+                     placeholder="••••••••">
+              <button type="button" class="btn-pw-eye" id="togglePasswordBtn" title="Toggle password visibility" aria-label="Toggle password visibility">
+                <i class="bi bi-eye" id="togglePasswordIcon"></i>
+              </button>
             </div>
           </div>
-          <button type="submit" class="btn-login">
-            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+
+          <button type="submit" class="btn-auth-submit" id="submitBtn">
+            <i class="bi bi-box-arrow-in-right"></i>
+            <span>Authenticate & Unlock Terminal</span>
           </button>
         </form>
 
-        <div class="demo-box">
-          <strong><i class="bi bi-key me-1"></i>Demo Accounts</strong>
-          <div class="mt-2">
-            <div class="demo-role">
-              <div class="demo-chip" style="background:#e8eefb;color:#1F3971;">🛡️</div>
-              <span>Admin → <code>admin</code> / <code>admin123</code></span>
-            </div>
-            <div class="demo-role">
-              <div class="demo-chip" style="background:#fdecea;color:#e53935;">🩺</div>
-              <span>Doctor → <code>drsara</code> / <code>doctor123</code></span>
-            </div>
-            <div class="demo-role">
-              <div class="demo-chip" style="background:#fff4dd;color:#b97c00;">🚑</div>
-              <span>Ambulance → <code>amb1</code> / <code>amb123</code></span>
-            </div>
+        <!-- QUICK CREDENTIAL CHIPS -->
+        <div class="quick-demo-strip">
+          <span class="quick-demo-label"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Quick Fill:</span>
+          <div class="quick-chips-group">
+            <button type="button" class="quick-chip" onclick="quickFill('admin', 'admin123', 'Administrator')">
+              🛡️ admin
+            </button>
+            <button type="button" class="quick-chip" onclick="quickFill('drsara', 'doctor123', 'Attending Doctor')">
+              🩺 drsara
+            </button>
+            <button type="button" class="quick-chip" onclick="quickFill('amb1', 'amb123', 'Ambulance Unit')">
+              🚑 amb1
+            </button>
           </div>
         </div>
+      </div>
 
-        <div class="text-center mt-3">
-          <a href="{{ url_for('index') }}" class="small" style="color:var(--muted);">
-            <i class="bi bi-arrow-left me-1"></i>Back to Home
-          </a>
-        </div>
+      <!-- FOOTER LINKS -->
+      <div class="console-footer-nav">
+        <a href="{{ url_for('index') }}" class="back-home-link">
+          <i class="bi bi-arrow-left"></i> Return to Public Site
+        </a>
+        <span class="footer-meta-secure">
+          <i class="bi bi-check-circle-fill text-success"></i> Terminal Ready
+        </span>
       </div>
     </div>
-  </div>
 
-  <footer class="site-footer" style="margin-bottom: 0;">
-    <div class="container text-center">
-      <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03</p>
-      <p class="mb-0 powered-by">Powered by <strong>Musafir Devs</strong></p>
-    </div>
-  </footer>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Show / Hide Password Toggle
+  const toggleBtn = document.getElementById('togglePasswordBtn');
+  const passwordInput = document.getElementById('passwordInput');
+  const toggleIcon = document.getElementById('togglePasswordIcon');
+
+  if (toggleBtn && passwordInput && toggleIcon) {
+    toggleBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const isPassword = passwordInput.getAttribute('type') === 'password';
+      passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+      toggleIcon.className = isPassword ? 'bi bi-eye-slash text-danger' : 'bi bi-eye';
+      toggleBtn.setAttribute('title', isPassword ? 'Hide passkey' : 'Show passkey');
+    });
+  }
+
+  // Role Tab Switcher Handler
+  function selectRoleTab(btn) {
+    document.querySelectorAll('.role-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const u = btn.getAttribute('data-user');
+    const p = btn.getAttribute('data-pass');
+    const userInput = document.getElementById('usernameInput');
+    const passInput = document.getElementById('passwordInput');
+    const roleHint = document.getElementById('roleHintLabel');
+
+    if (userInput && passInput) {
+      userInput.value = u;
+      passInput.value = p;
+      if (roleHint) {
+        if (u === 'admin') roleHint.textContent = 'Role: Administrator';
+        else if (u === 'drsara') roleHint.textContent = 'Role: Attending Doctor';
+        else roleHint.textContent = 'Role: Ambulance Unit Pilot';
+      }
+      userInput.focus();
+    }
+  }
+
+  // Quick Chip autofill
+  function quickFill(user, pass, roleLabel) {
+    const userInput = document.getElementById('usernameInput');
+    const passInput = document.getElementById('passwordInput');
+    const roleHint = document.getElementById('roleHintLabel');
+
+    if (userInput && passInput) {
+      userInput.value = user;
+      passInput.value = pass;
+      if (roleHint) roleHint.textContent = 'Role: ' + roleLabel;
+
+      // Sync active tab state
+      document.querySelectorAll('.role-tab-btn').forEach(b => {
+        if (b.getAttribute('data-user') === user) {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
+        }
+      });
+
+      userInput.focus();
+    }
+  }
+</script>
 {% endblock %}

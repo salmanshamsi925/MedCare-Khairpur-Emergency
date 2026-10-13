@@ -1,149 +1,172 @@
 {% extends "base.html" %}
-{% block title %}Admin Dashboard - MedCare Khairpur{% endblock %}
+{% block title %}Emergency Control Desk - MedCare Khairpur{% endblock %}
 
 {% block extra_css %}
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  /* =====================================================
-     MEDCARE EXECUTIVE COMMAND DESK (Theme: Navy #1F3971, Red #e53935, Yellow #FFAE27)
-     ===================================================== */
-  
   :root {
     --adm-navy: #1F3971;
-    --adm-navy-dark: #122448;
-    --adm-navy-light: #2c4e97;
+    --adm-navy-dark: #102146;
     --adm-red: #e53935;
-    --adm-red-dark: #c62828;
     --adm-yellow: #FFAE27;
     --adm-green: #10b981;
-    --adm-cyan: #0284c7;
-    --adm-bg: #f6f8fc;
+    --adm-bg: #f8fafc;
     --adm-card-border: #e2e8f0;
-    --adm-text-main: #0f172a;
-    --adm-text-muted: #64748b;
   }
 
   body {
     background-color: var(--adm-bg);
+    font-family: 'Poppins', sans-serif;
+    color: #0f172a;
   }
 
-  /* ===== Page Hero Refinement ===== */
-  .about-hero-small {
-    background: linear-gradient(135deg, #102146 0%, #1F3971 55%, #2a4c92 100%) !important;
-    position: relative;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  .about-hero-small::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(circle at 85% 20%, rgba(255, 174, 39, 0.12) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .hero-tag-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    color: #ffffff;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    padding: 4px 12px;
-    border-radius: 20px;
-    margin-bottom: 10px;
-    backdrop-filter: blur(4px);
-  }
-
-  /* ===== Modern Floating Flash Alerts ===== */
-  .admin-flash-alert {
-    background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
-    border: 1px solid #a7f3d0;
-    border-radius: 14px;
-    color: #065f46;
-    padding: 14px 20px;
-    margin-bottom: 24px;
+  /* ================= EXECUTIVE TOP CONTROL BAR ================= */
+  .executive-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--adm-card-border);
+    padding: 16px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.10);
-    animation: fadeInDown 0.35s ease-out;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
   }
-  .admin-flash-alert.alert-danger {
-    background: linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%);
-    border-color: #fecaca;
-    color: #991b1b;
-    box-shadow: 0 4px 16px rgba(229, 57, 53, 0.10);
+  .topbar-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
   }
-  .admin-flash-alert.alert-warning {
-    background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
-    border-color: #fde68a;
-    color: #92400e;
-    box-shadow: 0 4px 16px rgba(255, 174, 39, 0.12);
-  }
-  .admin-flash-alert.alert-info {
-    background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
-    border-color: #bfdbfe;
-    color: #1e40af;
-    box-shadow: 0 4px 16px rgba(31, 57, 113, 0.10);
-  }
-  .admin-flash-left {
+  .topbar-title-row {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
   }
-  .admin-flash-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: #10b981;
-    color: #ffffff;
+  .topbar-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--adm-navy-dark);
+    margin: 0;
+    letter-spacing: -0.02em;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.05rem;
-    flex-shrink: 0;
+    gap: 8px;
   }
-  .alert-danger .admin-flash-icon { background: var(--adm-red); }
-  .alert-warning .admin-flash-icon { background: var(--adm-yellow); color: #102146; }
-  .alert-info .admin-flash-icon { background: var(--adm-navy); }
-  .admin-flash-title {
-    font-weight: 600;
-    font-size: 0.93rem;
+  .topbar-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
-  .admin-flash-sub {
-    font-size: 0.78rem;
-    opacity: 0.85;
-    margin-left: 8px;
+  .live-dot-pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+    animation: pulseBeacon 1.8s infinite;
+  }
+  @keyframes pulseBeacon {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+  }
+  .topbar-sub {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 0;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-topbar-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.22s ease;
+  }
+  .btn-radar {
+    background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(229, 57, 53, 0.25);
+  }
+  .btn-radar:hover {
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(229, 57, 53, 0.35);
+  }
+  .btn-allocate {
+    background: #ffffff;
+    color: var(--adm-navy);
+    border: 1.5px solid var(--adm-card-border);
+  }
+  .btn-allocate:hover {
+    background: #f8fafc;
+    border-color: var(--adm-navy);
+    color: var(--adm-navy);
+    transform: translateY(-1px);
   }
 
-  /* ===== KPI Stat Cards ===== */
+  /* ================= MAIN CONTENT WRAPPER ================= */
+  .dashboard-main-content {
+    padding: 20px 24px 36px;
+    flex: 1;
+  }
+
+  /* Flash Alert */
+  .admin-flash-alert {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
+    color: #065f46;
+    padding: 12px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ================= HIGH-DENSITY KPI CARDS ================= */
   .admin-stats {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 14px;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
   .admin-stat-card {
     background: #ffffff;
-    border: 1px solid rgba(226, 232, 240, 0.9);
-    border-radius: 16px;
-    padding: 18px 14px 16px;
-    text-align: left;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
-    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--adm-card-border);
+    border-radius: 14px;
+    padding: 14px 14px 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    transition: all 0.22s ease;
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
   }
-  /* Top accent strip */
   .admin-stat-card::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 4px;
+    height: 3.5px;
     background: var(--adm-navy);
   }
   .admin-stat-card.stat-cases::before      { background: linear-gradient(90deg, #e53935, #ef5350); }
@@ -154,276 +177,144 @@
   .admin-stat-card.stat-doctors::before    { background: linear-gradient(90deg, #0284c7, #38bdf8); }
 
   .admin-stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 32px -4px rgba(31, 57, 113, 0.12), 0 4px 10px rgba(15, 23, 42, 0.04);
-    border-color: rgba(31, 57, 113, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
   }
-
   .stat-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
   .admin-stat-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
-    transition: transform 0.22s ease;
-  }
-  .admin-stat-card:hover .admin-stat-icon {
-    transform: scale(1.08);
+    font-size: 1.15rem;
   }
   .stat-pill {
     font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 3px 8px;
-    border-radius: 20px;
-    display: inline-flex;
-    align-items: center;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 12px;
   }
 
-  /* Stat-specific color palettes */
-  .icon-cases      { background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
+  .icon-cases      { background: #fef2f2; color: #dc2626; }
   .pill-cases      { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
   .text-cases      { color: #dc2626 !important; }
 
-  .icon-incoming   { background: #fffbeb; color: #d97706; border: 1px solid #fef3c7; }
+  .icon-incoming   { background: #fffbeb; color: #d97706; }
   .pill-incoming   { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
   .text-incoming   { color: #d97706 !important; }
 
-  .icon-beds       { background: #ecfdf5; color: #059669; border: 1px solid #d1fae5; }
+  .icon-beds       { background: #ecfdf5; color: #059669; }
   .pill-beds       { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
   .text-beds       { color: #059669 !important; }
 
-  .icon-ambulances { background: #eff6ff; color: #1F3971; border: 1px solid #dbeafe; }
+  .icon-ambulances { background: #eff6ff; color: #1F3971; }
   .pill-ambulances { background: #eff6ff; color: #1F3971; border: 1px solid #bfdbfe; }
   .text-ambulances { color: #1F3971 !important; }
 
-  .icon-onway      { background: #fef2f2; color: #e53935; border: 1px solid #fee2e2; }
+  .icon-onway      { background: #fef2f2; color: #e53935; }
   .pill-onway      { background: #fef2f2; color: #e53935; border: 1px solid #fecaca; }
   .text-onway      { color: #e53935 !important; }
 
-  .icon-doctors    { background: #f0f9ff; color: #0284c7; border: 1px solid #e0f2fe; }
+  .icon-doctors    { background: #f0f9ff; color: #0284c7; }
   .pill-doctors    { background: #f0f9ff; color: #0284c7; border: 1px solid #bae6fd; }
   .text-doctors    { color: #0284c7 !important; }
 
   .stat-value {
-    margin: 0 0 3px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 2.1rem;
+    font-size: 1.85rem;
     font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
+    line-height: 1;
+    margin-bottom: 4px;
+    font-family: 'Montserrat', sans-serif;
   }
   .stat-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
     margin: 0;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #334155;
-    letter-spacing: 0.01em;
   }
   .stat-caption {
-    margin: 2px 0 0;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     color: #94a3b8;
-    font-weight: 500;
+    margin-top: 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* Pulsing live beacon animations */
-  @keyframes pulseBeacon {
-    0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(229, 57, 53, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(229, 57, 53, 0); }
-    100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(229, 57, 53, 0); }
-  }
-  @keyframes pulseDotGreen {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.35; transform: scale(0.8); }
-  }
-  .pulse-dot-red {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #e53935;
-    animation: pulseBeacon 1.8s infinite;
-  }
-  .live-sync-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #10b981;
-    animation: pulseDotGreen 1.6s infinite;
-    flex-shrink: 0;
-  }
-  .live-beacon-white {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #ffffff;
-    animation: pulseBeacon 1.8s infinite;
-    flex-shrink: 0;
-  }
-
-  /* ===== Action Bar ===== */
-  .admin-actions-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 24px;
-    background: #ffffff;
-    padding: 12px 18px;
-    border-radius: 14px;
-    border: 1px solid var(--adm-card-border);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
-  }
-  .btn-admin-danger {
-    background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
-    color: #fff !important;
-    border: none;
-    border-radius: 10px;
-    padding: 11px 22px;
-    font-weight: 700;
-    font-size: 0.92rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(229, 57, 53, 0.28);
-    transition: all 0.25s ease;
-  }
-  .btn-admin-danger:hover {
-    background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(229, 57, 53, 0.42);
-  }
-  .btn-admin-outline {
-    background: #ffffff;
-    color: var(--adm-navy) !important;
-    border: 1.5px solid var(--adm-navy);
-    border-radius: 10px;
-    padding: 10px 22px;
-    font-weight: 700;
-    font-size: 0.92rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(31, 57, 113, 0.05);
-    transition: all 0.25s ease;
-  }
-  .btn-admin-outline:hover {
-    background: var(--adm-navy);
-    color: #ffffff !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(31, 57, 113, 0.25);
-  }
-  .btn-admin-outline:hover i {
-    color: var(--adm-yellow) !important;
-  }
-  .admin-telemetry-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #475569;
-    background: #f8fafc;
-    padding: 8px 14px;
-    border-radius: 20px;
-    border: 1px solid #e2e8f0;
-  }
-
-  /* ===== Recent Cases Table Card ===== */
+  /* ================= RECENT CASES TABLE ================= */
   .content-card {
     background: #ffffff;
     border: 1px solid var(--adm-card-border);
-    border-radius: 16px;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
     overflow: hidden;
-    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06);
   }
   .admin-card-header {
+    background: linear-gradient(90deg, #102146 0%, #1F3971 100%);
+    padding: 14px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 18px 24px;
-    background: linear-gradient(135deg, #102146 0%, #1F3971 65%, #2a4c94 100%);
-    color: #fff;
-    position: relative;
-  }
-  .admin-card-header::after {
-    content: '';
-    position: absolute;
-    top: 0; right: 0; bottom: 0; width: 220px;
-    background: radial-gradient(circle at 100% 50%, rgba(255,174,39,0.12), transparent 70%);
-    pointer-events: none;
+    color: #ffffff;
   }
   .admin-card-header-left {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
   }
   .admin-card-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: rgba(255, 174, 39, 0.16);
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: rgba(255, 174, 39, 0.18);
     border: 1px solid rgba(255, 174, 39, 0.35);
     color: #FFAE27;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
-    flex-shrink: 0;
+    font-size: 1.05rem;
   }
   .admin-card-header h5 {
     margin: 0;
     font-family: 'Montserrat', sans-serif;
     font-weight: 700;
-    font-size: 1.12rem;
+    font-size: 0.98rem;
     color: #ffffff;
-    letter-spacing: -0.01em;
   }
   .admin-card-header p {
-    margin: 2px 0 0;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.76);
+    margin: 1px 0 0;
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.75);
   }
   .btn-view-all {
-    background: linear-gradient(135deg, #FFAE27 0%, #f59e0b 100%);
-    color: #102146 !important;
-    font-weight: 700;
-    font-size: 0.84rem;
-    padding: 7px 18px;
+    background: #FFAE27;
+    color: #102146;
     border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    border: none;
-    box-shadow: 0 4px 14px rgba(255, 174, 39, 0.32);
-    transition: all 0.22s ease;
+    gap: 5px;
+    transition: all 0.2s ease;
   }
   .btn-view-all:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(255, 174, 39, 0.45);
-    color: #0c1833 !important;
+    background: #ffbe4a;
+    color: #102146;
+    transform: translateX(1px);
   }
 
-  /* Modern Enterprise Table */
+  /* Modern Table */
   .table-modern {
     width: 100%;
     margin-bottom: 0;
@@ -433,61 +324,51 @@
   .table-modern thead th {
     background: #f8fafc;
     color: #64748b;
-    font-size: 0.73rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.07em;
-    padding: 14px 20px;
-    border-top: none;
+    letter-spacing: 0.06em;
+    padding: 12px 16px;
     border-bottom: 1px solid #e2e8f0 !important;
     white-space: nowrap;
   }
   .table-modern tbody tr {
-    transition: background-color 0.18s ease;
+    transition: background-color 0.15s ease;
   }
   .table-modern tbody tr:hover {
     background-color: #f8fafc;
   }
   .table-modern tbody td {
-    padding: 16px 20px;
+    padding: 12px 16px;
     vertical-align: middle;
     border-bottom: 1px solid #f1f5f9;
+    font-size: 0.88rem;
     color: #1e293b;
-    font-size: 0.9rem;
-  }
-  .table-modern tbody tr:last-child td {
-    border-bottom: none;
   }
 
-  /* Monospace Code Badge */
   .case-code-badge {
-    display: inline-flex;
-    align-items: center;
-    font-family: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+    font-family: 'JetBrains Mono', Consolas, monospace;
     font-weight: 700;
-    font-size: 0.84rem;
+    font-size: 0.82rem;
     color: var(--adm-navy);
     background: #eff6ff;
     border: 1px solid #dbeafe;
-    padding: 4px 10px;
-    border-radius: 8px;
-    letter-spacing: 0.02em;
+    padding: 3px 8px;
+    border-radius: 6px;
   }
-
-  /* Patient cell */
   .patient-cell {
     display: flex;
     align-items: center;
     gap: 10px;
   }
   .patient-avatar {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
     color: #3730a3;
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -496,126 +377,63 @@
   .patient-name {
     font-weight: 600;
     color: #0f172a;
-    text-transform: capitalize;
   }
 
-  /* Priority Badges */
   .priority-pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
+    gap: 5px;
+    padding: 3px 10px;
     border-radius: 20px;
-    font-size: 0.76rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    letter-spacing: 0.02em;
   }
-  .priority-pill-critical {
-    background: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-  }
-  .priority-pill-high {
-    background: #fff7ed;
-    color: #ea580c;
-    border: 1px solid #fed7aa;
-  }
-  .priority-pill-medium {
-    background: #fefce8;
-    color: #ca8a04;
-    border: 1px solid #fef08a;
-  }
-  .priority-pill-low {
-    background: #f0fdf4;
-    color: #16a34a;
-    border: 1px solid #bbf7d0;
-  }
+  .priority-pill-critical { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .priority-pill-high     { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+  .priority-pill-medium   { background: #fefce8; color: #ca8a04; border: 1px solid #fef08a; }
+  .priority-pill-low      { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
   .priority-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    display: inline-block;
   }
-  .dot-critical {
-    background: #dc2626;
-    animation: pulseBeacon 1.8s infinite;
-  }
-  .dot-high   { background: #ea580c; }
-  .dot-medium { background: #ca8a04; }
-  .dot-low    { background: #16a34a; }
+  .dot-critical { background: #dc2626; }
+  .dot-high     { background: #ea580c; }
+  .dot-medium   { background: #ca8a04; }
+  .dot-low      { background: #16a34a; }
 
-  /* Status Badges */
   .status-pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
+    gap: 5px;
+    padding: 3px 10px;
     border-radius: 20px;
-    font-size: 0.76rem;
+    font-size: 0.72rem;
     font-weight: 600;
   }
-  .status-pill-incoming {
-    background: #fffbeb;
-    color: #b45309;
-    border: 1px solid #fde68a;
-  }
-  .status-pill-dispatched {
-    background: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-  }
-  .status-pill-active {
-    background: #eff6ff;
-    color: #1d4ed8;
-    border: 1px solid #bfdbfe;
-  }
-  .status-pill-closed {
-    background: #f8fafc;
-    color: #64748b;
-    border: 1px solid #e2e8f0;
-  }
-  .status-dot-active {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #2563eb;
-    animation: pulseDotGreen 1.6s infinite;
-  }
+  .status-pill-incoming   { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+  .status-pill-dispatched { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .status-pill-active     { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .status-pill-closed     { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
 
-  /* Condition & Time */
-  .condition-cell {
-    color: #334155;
-    font-size: 0.88rem;
-    max-width: 250px;
-  }
-  .time-cell {
-    color: #64748b;
-    font-size: 0.82rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-  }
-
-  /* Table action arrow */
   .btn-table-action {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     border-radius: 8px;
     background: #f1f5f9;
     color: var(--adm-navy);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.15rem;
-    transition: all 0.2s ease;
+    font-size: 1.05rem;
+    text-decoration: none;
     border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
   }
   .btn-table-action:hover {
     background: var(--adm-navy);
-    color: #ffffff !important;
+    color: #ffffff;
     border-color: var(--adm-navy);
-    transform: translateX(2px);
   }
 
   /* Responsive breakpoints */
@@ -623,24 +441,22 @@
     .admin-stats { grid-template-columns: repeat(3, 1fr); }
   }
   @media (max-width: 767px) {
+    .executive-topbar { padding: 14px 16px; }
+    .dashboard-main-content { padding: 14px 16px 28px; }
     .admin-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .admin-stat-card { padding: 14px 12px; }
-    .stat-value { font-size: 1.65rem; }
-    .stat-label { font-size: 0.74rem; }
-    .stat-caption { display: none; }
-    .admin-actions-bar { flex-direction: column; align-items: stretch; }
-    .btn-admin-danger, .btn-admin-outline { width: 100%; justify-content: center; }
-    .admin-card-header { padding: 16px 18px; flex-wrap: wrap; }
-  }
-  @media (max-width: 480px) {
-    .admin-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .admin-stat-icon { width: 36px; height: 36px; font-size: 1.05rem; }
-    .stat-pill { display: none; }
+    .stat-value { font-size: 1.6rem; }
+    .topbar-right { width: 100%; justify-content: stretch; }
+    .btn-topbar-action { flex: 1; justify-content: center; }
   }
 
   .site-footer {
     margin-top: auto !important;
     margin-bottom: 0 !important;
+    padding: 16px 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    border-top: 1px solid var(--adm-card-border);
+    background: #ffffff;
   }
 </style>
 {% endblock %}
@@ -648,62 +464,54 @@
 {% block body %}
 {% include 'admin/_nav.html' %}
 
-<!-- ================= PAGE HERO (Executive Control Desk) ================= -->
-<div class="about-hero-area about-hero-small">
-  <div class="about-hero-bg"></div>
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-lg-8 col-md-12">
-        <div class="about-hero-content py-4">
-          <div class="hero-tag-badge">
-            <span class="live-sync-dot"></span>
-            <span>Khairpur Emergency Operational Grid</span>
-          </div>
-          <h2 class="about-hero-title mb-2" style="font-size: 32px; font-weight: 800; letter-spacing: -0.02em;">
-            <i class="bi bi-speedometer2 text-warning me-2"></i>Emergency Control Desk
-          </h2>
-          <p class="about-hero-text mb-0" style="color: rgba(255,255,255,0.85); font-size: 0.95rem;">
-            Welcome, <strong>{{ session.name }}</strong> · Real-time command overview of Khairpur district operations
-          </p>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-12 d-none d-lg-block text-end">
-        <div style="font-size: 4.5rem; opacity: 0.22; line-height: 1;">🏥</div>
-      </div>
+<!-- ================= EXECUTIVE TOP CONTROL BAR ================= -->
+<header class="executive-topbar">
+  <div class="topbar-left">
+    <div class="topbar-title-row">
+      <h1 class="topbar-title">
+        <i class="bi bi-speedometer2 text-warning"></i>
+        <span>Emergency Control Desk</span>
+      </h1>
+      <span class="topbar-status-chip">
+        <span class="live-dot-pulse"></span>
+        <span>Grid Connected</span>
+      </span>
     </div>
+    <p class="topbar-sub">
+      District Khairpur Operations · Commander: <strong>{{ session.name or 'Admin' }}</strong>
+    </p>
   </div>
-</div>
+  <div class="topbar-right">
+    <a href="{{ url_for('admin_track') }}" class="btn-topbar-action btn-radar">
+      <i class="bi bi-broadcast"></i>
+      <span>Live Fleet Radar</span>
+    </a>
+    <a href="{{ url_for('admin_allocate') }}" class="btn-topbar-action btn-allocate">
+      <i class="bi bi-magic text-warning"></i>
+      <span>Smart Allocate</span>
+    </a>
+  </div>
+</header>
 
-<!-- ================= DASHBOARD CONTENT ================= -->
-<div class="container section-padding" style="padding-top: 32px; padding-bottom: 50px;">
-  
+<!-- ================= MAIN WORKSPACE (FITS THE SCREEN) ================= -->
+<main class="dashboard-main-content">
+
   <!-- Flash Notification (if any) -->
   {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-      <div class="admin-flash-alert alert-{{ category }} alert alert-dismissible fade show" role="alert">
-        <div class="admin-flash-left">
-          <div class="admin-flash-icon">
-            {% if category == 'success' %}
-              <i class="bi bi-check-lg"></i>
-            {% elif category == 'danger' %}
-              <i class="bi bi-exclamation-triangle-fill"></i>
-            {% elif category == 'warning' %}
-              <i class="bi bi-exclamation-circle-fill"></i>
-            {% else %}
-              <i class="bi bi-info-circle-fill"></i>
-            {% endif %}
-          </div>
-          <div>
-            <span class="admin-flash-title">{{ message }}</span>
-            <span class="admin-flash-sub text-muted small d-none d-sm-inline">· Live command active</span>
-          </div>
+    {% if messages %}
+      {% for category, message in messages %}
+      <div class="admin-flash-alert alert-{{ category }}">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-info-circle-fill"></i>
+          <span class="fw-semibold">{{ message }}</span>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
       </div>
-    {% endfor %}
+      {% endfor %}
+    {% endif %}
   {% endwith %}
 
-  <!-- KPI Stat Cards Grid -->
+  <!-- 6 High-Density KPI Stat Cards -->
   <div class="admin-stats">
     
     <!-- 1. Active Cases -->
@@ -712,13 +520,11 @@
         <div class="admin-stat-icon icon-cases">
           <i class="bi bi-clipboard2-pulse"></i>
         </div>
-        <span class="stat-pill pill-cases">
-          <span class="pulse-dot-red me-1"></span>Urgent
-        </span>
+        <span class="stat-pill pill-cases">Urgent</span>
       </div>
-      <h3 class="stat-value text-cases">{{ active_cases }}</h3>
-      <p class="stat-label">Active Cases</p>
-      <span class="stat-caption">Active & Dispatched</span>
+      <div class="stat-value text-cases">{{ active_cases }}</div>
+      <div class="stat-label">Active Cases</div>
+      <div class="stat-caption">Active & Dispatched</div>
     </div>
 
     <!-- 2. Incoming Requests -->
@@ -729,9 +535,9 @@
         </div>
         <span class="stat-pill pill-incoming">Queue</span>
       </div>
-      <h3 class="stat-value text-incoming">{{ incoming }}</h3>
-      <p class="stat-label">Incoming Requests</p>
-      <span class="stat-caption">Awaiting triage & allocation</span>
+      <div class="stat-value text-incoming">{{ incoming }}</div>
+      <div class="stat-label">Incoming Requests</div>
+      <div class="stat-caption">Awaiting triage</div>
     </div>
 
     <!-- 3. Beds Available -->
@@ -742,9 +548,9 @@
         </div>
         <span class="stat-pill pill-beds">Available</span>
       </div>
-      <h3 class="stat-value text-beds">{{ free_beds }}</h3>
-      <p class="stat-label">Beds Available</p>
-      <span class="stat-caption">ICU, Emergency & General</span>
+      <div class="stat-value text-beds">{{ free_beds }}</div>
+      <div class="stat-label">Beds Available</div>
+      <div class="stat-caption">ICU & Emergency</div>
     </div>
 
     <!-- 4. Ambulances Ready -->
@@ -755,9 +561,9 @@
         </div>
         <span class="stat-pill pill-ambulances">Standby</span>
       </div>
-      <h3 class="stat-value text-ambulances">{{ free_amb }}</h3>
-      <p class="stat-label">Ambulances Ready</p>
-      <span class="stat-caption">ALS & BLS on fleet standby</span>
+      <div class="stat-value text-ambulances">{{ free_amb }}</div>
+      <div class="stat-label">Ambulances Ready</div>
+      <div class="stat-caption">10-unit fleet ready</div>
     </div>
 
     <!-- 5. On the Way -->
@@ -766,13 +572,11 @@
         <div class="admin-stat-icon icon-onway">
           <i class="bi bi-broadcast"></i>
         </div>
-        <span class="stat-pill pill-onway">
-          <span class="pulse-dot-red me-1"></span>En Route
-        </span>
+        <span class="stat-pill pill-onway">En Route</span>
       </div>
-      <h3 class="stat-value text-onway">{{ on_way_amb }}</h3>
-      <p class="stat-label">On the Way</p>
-      <span class="stat-caption">Live transit tracking</span>
+      <div class="stat-value text-onway">{{ on_way_amb }}</div>
+      <div class="stat-label">On the Way</div>
+      <div class="stat-caption">Live transit</div>
     </div>
 
     <!-- 6. Doctors Free -->
@@ -783,35 +587,14 @@
         </div>
         <span class="stat-pill pill-doctors">On Duty</span>
       </div>
-      <h3 class="stat-value text-doctors">{{ free_doctors }}</h3>
-      <p class="stat-label">Doctors Free</p>
-      <span class="stat-caption">Specialists & ER physicians</span>
+      <div class="stat-value text-doctors">{{ free_doctors }}</div>
+      <div class="stat-label">Doctors Free</div>
+      <div class="stat-caption">Khairpur healthcare</div>
     </div>
 
   </div>
 
-  <!-- Command Action Bar -->
-  <div class="admin-actions-bar">
-    <div class="d-flex flex-wrap gap-2 align-items-center">
-      <a href="{{ url_for('admin_track') }}" class="btn-admin-danger">
-        <span class="live-beacon-white"></span>
-        <i class="bi bi-broadcast"></i>
-        <span>Track All Ambulances Live</span>
-      </a>
-      <a href="{{ url_for('admin_allocate') }}" class="btn-admin-outline">
-        <i class="bi bi-stars" style="color: var(--adm-yellow);"></i>
-        <span>Smart Allocate</span>
-      </a>
-    </div>
-
-    <div class="admin-telemetry-badge d-none d-md-inline-flex">
-      <span class="live-sync-dot"></span>
-      <span>Live Ops Dispatch: <strong>CONNECTED</strong></span>
-      <span class="text-muted ms-2">· Real-time sync</span>
-    </div>
-  </div>
-
-  <!-- Recent Cases Modern Table Card -->
+  <!-- Recent Cases Live Table Card (Visible immediately on screen) -->
   <div class="content-card">
     <div class="admin-card-header">
       <div class="admin-card-header-left">
@@ -819,16 +602,16 @@
           <i class="bi bi-activity"></i>
         </div>
         <div>
-          <h5>Recent Cases</h5>
-          <p>Latest active, incoming and dispatched emergencies in Khairpur</p>
+          <h5>Recent Emergency Cases</h5>
+          <p>Real-time active and incoming dispatch telemetry</p>
         </div>
       </div>
       <div class="d-flex align-items-center gap-2">
-        <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25 px-3 py-2 rounded-pill d-none d-sm-inline-flex align-items-center">
-          <span class="live-sync-dot me-1"></span> Live Feed ({{ recent|length }})
+        <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25 px-3 py-1 rounded-pill small d-none d-sm-inline-flex">
+          <span class="live-dot-pulse me-1"></span> Live Feed ({{ recent|length }})
         </span>
         <a href="{{ url_for('admin_cases') }}" class="btn-view-all">
-          <span>View All</span>
+          <span>View All Cases</span>
           <i class="bi bi-arrow-right"></i>
         </a>
       </div>
@@ -844,7 +627,7 @@
               <th>Priority</th>
               <th>Condition</th>
               <th>Status</th>
-              <th>Time</th>
+              <th>Registered</th>
               <th class="text-end">Action</th>
             </tr>
           </thead>
@@ -885,11 +668,9 @@
                 {% endif %}
               </td>
               <td>
-                <div class="condition-cell" title="{{ c.condition }}">
-                  <div class="d-flex align-items-center">
-                    <i class="bi bi-heart-pulse-fill text-danger me-2 flex-shrink-0" style="font-size: 0.85rem;"></i>
-                    <span class="text-truncate">{{ c.condition }}</span>
-                  </div>
+                <div class="d-flex align-items-center text-truncate" style="max-width:200px;" title="{{ c.condition }}">
+                  <i class="bi bi-heart-pulse-fill text-danger me-2 flex-shrink-0" style="font-size: 0.85rem;"></i>
+                  <span>{{ c.condition }}</span>
                 </div>
               </td>
               <td>
@@ -903,7 +684,7 @@
                   </span>
                 {% elif c.status == 'Active' %}
                   <span class="status-pill status-pill-active">
-                    <span class="status-dot-active"></span>Active
+                    <span class="live-dot-pulse me-1"></span>Active
                   </span>
                 {% else %}
                   <span class="status-pill status-pill-closed">
@@ -912,13 +693,10 @@
                 {% endif %}
               </td>
               <td>
-                <div class="time-cell">
-                  <i class="bi bi-clock me-1 text-muted"></i>
-                  <span>{{ c.registered_at.strftime('%d %b %H:%M') }}</span>
-                </div>
+                <span class="small text-muted">{{ c.registered_at.strftime('%d %b %H:%M') }}</span>
               </td>
               <td class="text-end">
-                <a href="{{ url_for('admin_cases') }}" class="btn-table-action" title="Manage case">
+                <a href="{{ url_for('admin_cases') }}" class="btn-table-action" title="View details in Cases">
                   <i class="bi bi-arrow-right-short"></i>
                 </a>
               </td>
@@ -928,7 +706,7 @@
               <td colspan="7" class="text-center text-muted py-5">
                 <i class="bi bi-clipboard2-check display-6 text-muted mb-2 d-block opacity-50"></i>
                 <div class="fw-semibold">No emergency cases in queue</div>
-                <div class="small text-muted">All active cases and live dispatches will appear here instantly.</div>
+                <div class="small text-muted">Active admissions will appear here in real time.</div>
               </td>
             </tr>
             {% endfor %}
@@ -938,38 +716,12 @@
     </div>
   </div>
 
-</div>
+</main>
 
 <!-- ================= FOOTER ================= -->
 <footer class="site-footer">
-  <div class="container text-center">
-    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03</p>
-    <p class="mb-0 powered-by">Powered by <strong>Musafir Devs</strong></p>
+  <div class="container-fluid px-4 text-center">
+    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03 · Powered by <strong>Musafir Devs</strong></p>
   </div>
 </footer>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  /* ===== Mobile sidebar interaction ===== */
-  const sidebar = document.getElementById('mobileSidebar');
-  const sidebarOverlay = document.getElementById('mobileSidebarOverlay');
-  const hamburger = document.getElementById('mobileHamburger');
-  function openSidebar() {
-    sidebar.classList.add('open');
-    sidebarOverlay.classList.add('open');
-    hamburger.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeSidebar() {
-    sidebar.classList.remove('open');
-    sidebarOverlay.classList.remove('open');
-    hamburger.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-  hamburger?.addEventListener('click', e => { e.preventDefault(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
-  document.getElementById('mobileSidebarClose')?.addEventListener('click', e => { e.preventDefault(); closeSidebar(); });
-  sidebarOverlay?.addEventListener('click', closeSidebar);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
-</script>
 {% endblock %}

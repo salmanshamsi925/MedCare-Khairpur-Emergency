@@ -3,23 +3,7 @@
 
 {% block body %}
 <header>
-  <!-- Top bar: on mobile show ONLY the phone number -->
-  <div class="header-top">
-    <div class="container">
-      <div class="row align-items-center">
-        <div class="col-7 col-lg-7">
-          <span class="ht-question d-none d-md-inline"><i class="bi bi-question-circle me-1"></i> Need help? We are 24/7 available</span>
-          <a href="tel:+923001234567" class="ht-phone-mobile d-md-none"><i class="bi bi-telephone-fill me-1"></i> +92 300 1234567</a>
-        </div>
-        <div class="col-5 col-lg-5 text-end">
-          <span class="ht-phone d-none d-md-inline"><i class="bi bi-telephone me-1"></i> +92 300 1234567</span>
-          <span class="ht-emergency d-none d-md-inline"><i class="bi bi-telephone-fill me-1"></i> THE Emergency Contacts</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Desktop: logo + nav (sticky) -->
+  <!-- Desktop: logo + nav (sticky on top) -->
   <div class="header-logo-menu sticker">
     <div class="container">
       <div class="row align-items-center">
@@ -36,7 +20,8 @@
               <ul id="nav">
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li class="current"><a href="{{ url_for('request_help') }}">Emergency</a></li>
-                <li><a href="{{ url_for('request_help') }}" class="nav-ambulance">Ambulance</a></li>
+                <li><a href="{{ url_for('request_help') }}" class="nav-ambulance"><span>🚑</span> Ambulance</a></li>
+                <li><a href="{{ url_for('login') }}" class="nav-login"><i class="bi bi-shield-lock-fill me-1"></i> Admin Login</a></li>
               </ul>
             </nav>
           </div>
@@ -61,6 +46,22 @@
     </div>
   </div>
 
+  <!-- Emergency Contacts strip below Navbar -->
+  <div class="header-top">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-7 col-lg-7">
+          <span class="ht-question d-none d-md-inline"><i class="bi bi-question-circle me-1"></i> Need help? We are 24/7 available</span>
+          <a href="tel:+923001234567" class="ht-phone-mobile d-md-none"><i class="bi bi-telephone-fill me-1"></i> +92 300 1234567</a>
+        </div>
+        <div class="col-5 col-lg-5 text-end">
+          <span class="ht-phone d-none d-md-inline"><i class="bi bi-telephone me-1"></i> +92 300 1234567</span>
+          <span class="ht-emergency d-none d-md-inline"><i class="bi bi-telephone-fill me-1"></i> THE Emergency Contacts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Mobile slide-out sidebar -->
   <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
   <aside class="mobile-sidebar" id="mobileSidebar">
@@ -72,7 +73,8 @@
       <ul>
         <li><a href="{{ url_for('index') }}"><i class="bi bi-house-door me-2"></i> Home</a></li>
         <li><a href="{{ url_for('request_help') }}"><i class="bi bi-exclamation-triangle me-2"></i> Emergency</a></li>
-        <li><a href="{{ url_for('request_help') }}"><i class="bi bi-ambulance me-2"></i> Ambulance</a></li>
+        <li><a href="{{ url_for('request_help') }}"><span class="me-2">🚑</span> Ambulance</a></li>
+        <li><a href="{{ url_for('login') }}"><i class="bi bi-shield-lock-fill me-2"></i> Admin Login</a></li>
       </ul>
     </nav>
   </aside>
@@ -85,7 +87,7 @@
     <div class="row">
       <div class="col-12">
         <div class="about-hero-content">
-          <h2 class="about-hero-title"><i class="bi bi-ambulance me-2"></i>Request Emergency Help</h2>
+          <h2 class="about-hero-title"><span class="me-2">🚑</span>Request Emergency Help</h2>
           <p class="about-hero-text">
             Submit patient details — our system instantly finds the nearest hospital,
             reserves a bed, assigns a doctor and dispatches the closest ambulance within 20 km in Khairpur.
@@ -176,59 +178,116 @@
   </div>
 </footer>
 
-<!-- ================= AI ASSISTANT BOTTOM BAR ================= -->
-<div class="ai-bottom-bar" id="aiBottomBar">
+<!-- ================= AI ASSISTANT FLOATING EXECUTIVE LAUNCHER ================= -->
+<div class="ai-bottom-bar" id="aiBottomBar" title="Open MedCare AI Emergency Triage Assistant">
   <div class="ai-bar-inner">
     <div class="ai-bar-left">
       <div class="ai-avatar"><i class="bi bi-robot"></i></div>
       <div>
-        <strong>MedCare AI Assistant</strong>
-        <span class="d-block">Guided emergency intake · Nearby hospitals · Ambulance dispatch · Tap to open</span>
+        <strong>MedCare AI Copilot</strong>
+        <span>Autonomous Emergency Triage & Dispatch · Tap to Launch</span>
       </div>
     </div>
-    <div class="ai-bar-open-btn"><i class="bi bi-chevron-up"></i></div>
+    <div class="ai-bar-open-btn"><i class="bi bi-chat-dots-fill"></i></div>
   </div>
 </div>
 
-<!-- ================= FULL SCREEN AI ASSISTANT ================= -->
+<!-- ================= EXECUTIVE AI ASSISTANT CONSOLE ================= -->
 <div id="aiAssistantOverlay" class="ai-overlay">
   <div class="ai-overlay-inner">
     <div class="ai-overlay-header">
-      <div class="d-flex align-items-center gap-2">
-        <div class="ai-avatar large"><i class="bi bi-robot"></i></div>
-        <div>
-          <strong>MedCare AI Assistant</strong>
-          <small class="d-block opacity-75">Guided emergency intake · Nearby hospitals · Ambulance dispatch</small>
+      <div class="ai-header-badge">
+        <div class="ai-avatar"><i class="bi bi-robot"></i></div>
+        <div class="ai-header-info">
+          <h4>MedCare AI Emergency Copilot</h4>
+          <span class="beacon-text">
+            <span class="beacon-dot"></span>
+            Live Triage Engine · Instant Khairpur Dispatch
+          </span>
         </div>
       </div>
-      <button type="button" class="btn-close-ai" id="closeAssistantBtn" aria-label="Close">
-        <i class="bi bi-x-lg"></i>
-      </button>
+      <div class="ai-header-actions">
+        <button type="button" class="btn-ai-action" id="resetAiBtn" onclick="resetFlow()" title="Restart Intake Session">
+          <i class="bi bi-arrow-clockwise"></i> Reset
+        </button>
+        <button type="button" class="btn-close-ai" id="closeAssistantBtn" aria-label="Close Assistant">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
     </div>
 
     <div class="ai-chat-area" id="aiChatArea">
-      <div class="ai-msg bot">
-        <div class="ai-msg-content">
-          Assalam-o-Alaikum! Main MedCare AI Assistant hoon.<br>
-          I can help you:<br>
-          • 🚨 Register an emergency in under a minute<br>
-          • 🏥 Find the 3 nearest hospitals<br>
-          • 🚑 Dispatch an ambulance (10-unit fleet, 20 km range)<br>
-          • 🗺️ Track the ambulance live on a map
+      <!-- STRUCTURED WELCOME DECK (HCI COMPLIANT) -->
+      <div class="ai-welcome-deck">
+        <div class="ai-welcome-header">
+          <div class="ai-intake-icon" style="background:#e8eefb;color:#1F3971;">
+            <i class="bi bi-shield-heart-fill"></i>
+          </div>
+          <div class="ai-welcome-title">
+            <h5>Assalam-o-Alaikum! MedCare Triage Assistant</h5>
+            <p>Smart Medical Intake · 3 Nearest Hospitals · 10-Unit Ambulance Fleet GPS</p>
+          </div>
+        </div>
+
+        <div class="ai-cards-grid">
+          <button type="button" class="ai-intake-card" onclick="handleAnswer('emergency')">
+            <div class="ai-intake-icon text-danger" style="background:#fee2e2;">
+              <i class="bi bi-exclamation-octagon-fill"></i>
+            </div>
+            <div class="ai-intake-text">
+              <h6>Report Emergency</h6>
+              <span>Step-by-step triage under 1 min</span>
+            </div>
+          </button>
+
+          <button type="button" class="ai-intake-card" onclick="handleAnswer('hospital')">
+            <div class="ai-intake-icon text-primary" style="background:#dbeafe;">
+              <i class="bi bi-hospital-fill"></i>
+            </div>
+            <div class="ai-intake-text">
+              <h6>Find 3 Hospitals</h6>
+              <span>Check ER & ICU beds near you</span>
+            </div>
+          </button>
+
+          <button type="button" class="ai-intake-card" onclick="handleAnswer('ambulance')">
+            <div class="ai-intake-icon" style="background:#fef3c7; font-size:1.35rem; line-height:1;">
+              🚑
+            </div>
+            <div class="ai-intake-text">
+              <h6>Ambulance Fleet</h6>
+              <span>Live readiness in 20 km range</span>
+            </div>
+          </button>
+
+          <button type="button" class="ai-intake-card" onclick="handleAnswer('help')">
+            <div class="ai-intake-icon text-success" style="background:#d1fae5;">
+              <i class="bi bi-question-circle-fill"></i>
+            </div>
+            <div class="ai-intake-text">
+              <h6>How It Works</h6>
+              <span>Emergency SLAs & hotlines</span>
+            </div>
+          </button>
         </div>
       </div>
     </div>
 
+    <!-- QUICK PROMPTS CHIP STRIP -->
     <div class="ai-quick-actions">
-      <button class="ai-chip" data-q="emergency">🚨 New Emergency Request</button>
-      <button class="ai-chip" data-q="help">Request Help</button>
-      <button class="ai-chip" data-q="hospital">Nearby Hospitals</button>
-      <button class="ai-chip" data-q="ambulance">Ambulance Info</button>
+      <button type="button" class="ai-chip" data-q="emergency"><i class="bi bi-exclamation-triangle-fill text-danger"></i> Register Emergency</button>
+      <button type="button" class="ai-chip" data-q="hospital"><i class="bi bi-hospital text-primary"></i> Nearest Hospitals</button>
+      <button type="button" class="ai-chip" data-q="ambulance"><span>🚑</span> Ambulance Fleet</button>
+      <button type="button" class="ai-chip" data-q="help"><i class="bi bi-info-circle text-info"></i> Intake Guidance</button>
     </div>
 
+    <!-- INPUT CONSOLE -->
     <div class="ai-input-area">
-      <input type="text" id="aiInput" class="form-control" placeholder="Type your answer or question..." autocomplete="off">
-      <button type="button" class="btn btn-primary" id="aiSendBtn">
+      <button type="button" class="btn-gps-trigger" id="inputGpsBtn" title="Detect & Attach Current GPS Location" aria-label="Use GPS Location">
+        <i class="bi bi-geo-alt-fill text-danger"></i>
+      </button>
+      <input type="text" id="aiInput" class="form-control" placeholder="Type patient details, symptoms, or question..." autocomplete="off">
+      <button type="button" class="btn-send" id="aiSendBtn" aria-label="Send message">
         <i class="bi bi-send-fill"></i>
       </button>
     </div>
@@ -480,6 +539,32 @@
 
   document.getElementById('aiSendBtn')?.addEventListener('click', sendTyped);
   aiInput?.addEventListener('keydown', e => { if (e.key === 'Enter') sendTyped(); });
+
+  const inputGpsBtn = document.getElementById('inputGpsBtn');
+  inputGpsBtn?.addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      addMessage('GPS is not supported on your browser. Please type your area.', 'bot');
+      return;
+    }
+    inputGpsBtn.classList.add('opacity-50');
+    navigator.geolocation.getCurrentPosition(p => {
+      inputGpsBtn.classList.remove('opacity-50');
+      const lat = p.coords.latitude.toFixed(4);
+      const lng = p.coords.longitude.toFixed(4);
+      if (flow && flow.step === 'location') {
+        flow.data.lat = p.coords.latitude;
+        flow.data.lng = p.coords.longitude;
+        addMessage('✅ GPS Location captured: ' + lat + ', ' + lng, 'bot');
+        showHospitals();
+      } else {
+        aiInput.value = 'GPS: ' + lat + ', ' + lng;
+        aiInput.focus();
+      }
+    }, () => {
+      inputGpsBtn.classList.remove('opacity-50');
+      addMessage('GPS unavailable. Please type your area/landmark as text.', 'bot');
+    });
+  });
 
   function sendTyped() {
     const text = aiInput.value.trim();
