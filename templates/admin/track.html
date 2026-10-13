@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+{% block title %}Track Ambulances - MedCare Khairpur{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ================= FLEET TRACKING (SMART & CLEAN) ================= */
+  .admin-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 18px 22px;
+    background: linear-gradient(120deg, var(--navy), var(--navy-light));
+    color: #fff; border-radius: 12px 12px 0 0;
+  }
+  .admin-card-header-left {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .admin-card-icon {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: rgba(255,174,39,0.22); color: var(--yellow);
+    display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;
+  }
+  .admin-card-header h5 {
+    margin: 0; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff;
+  }
+  .admin-card-header p {
+    margin: 2px 0 0; font-size: 0.78rem; color: rgba(255,255,255,0.78);
+  }
+  
+  .content-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(15,30,50,0.06);
+  }
+
+  .live-badge {
+    background: var(--red); color: #fff; font-size: 0.72rem; font-weight: 700;
+    padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .live-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: #fff; animation: livePulse 1.5s infinite;
+  }
+  @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* Equal-Height Map & Table Containers */
+  .fleet-workspace-row {
+    min-height: 540px;
+  }
+  .map-container-box {
+    height: 540px;
+    width: 100%;
+    position: relative;
+  }
+  #fleetMap {
+    height: 100%;
+    width: 100%;
+    border-radius: 0 0 12px 12px;
+    z-index: 1;
+  }
+
+  /* Right Fleet Table: STRICTLY NO HORIZONTAL SCROLL */
+  .table-container-box {
+    height: 540px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .fleet-scroll-area {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden !important;
+    max-height: 540px;
+  }
+  .fleet-scroll-area::-webkit-scrollbar {
+    width: 5px;
+    height: 0px !important;
+  }
+  .fleet-scroll-area::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  .fleet-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  /* Fixed 100% width table */
+  .fleet-smart-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 0;
+  }
+  .fleet-smart-table thead th {
+    background: #f8fafc;
+    color: var(--navy);
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border) !important;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    white-space: nowrap;
+  }
+  .fleet-smart-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+  .fleet-smart-table tbody tr:hover {
+    background-color: #f1f5f9 !important;
+  }
+  .fleet-smart-table tbody tr.active-unit {
+    background-color: #e8eefb !important;
+  }
+  .fleet-smart-table tbody td {
+    padding: 11px 10px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Status Badges */
+  .badge-status-ready {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+    font-weight: 600;
+    font-size: 0.74rem;
+    padding: 3px 8px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .badge-status-onway {
+    background: #fdecea;
+    color: #e53935;
+    border: 1px solid #ffcdd2;
+    font-weight: 700;
+    font-size: 0.74rem;
+    padding: 3px 8px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .badge-status-busy {
+    background: #fff4dd;
+    color: #b97c00;
+    border: 1px solid #ffe0b2;
+    font-weight: 600;
+    font-size: 0.74rem;
+    padding: 3px 8px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Unit Badge */
+  .unit-code-tag {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 0.85rem;
+  }
+  .unit-sub-type {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 1px 5px;
+    border-radius: 4px;
+    margin-left: 3px;
+  }
+
+  /* ETA & Case labels */
+  .eta-tag {
+    color: #e53935;
+    font-weight: 600;
+    font-size: 0.78rem;
+  }
+  .arrived-tag {
+    color: #2e7d32;
+    font-weight: 600;
+    font-size: 0.78rem;
+  }
+
+  /* Popups */
+  .amb-popup { font-size: 0.85rem; line-height: 1.5; padding: 2px; }
+
+  /* Map pins */
+  .fleet-marker-icon {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; border: 2px solid #fff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+  }
+  .fmarker-ready { background: #2e7d32; }
+  .fmarker-onway { background: #e53935; animation: livePulse 1.8s infinite; }
+  .fmarker-busy  { background: #b97c00; }
+
+  /* Clean sticky footer */
+  .site-footer {
+    margin-top: auto !important;
+    margin-bottom: 0 !important;
+  }
+
+  @media (max-width: 991px) {
+    .map-container-box, .table-container-box { height: 420px; }
+    .fleet-scroll-area { max-height: 420px; }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+{% include 'admin/_nav.html' %}
+
+<!-- ================= CLEAN ADMIN HERO ================= -->
+<div class="about-hero-area about-hero-small">
+  <div class="about-hero-bg"></div>
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8 col-md-12">
+        <div class="about-hero-content">
+          <h2 class="about-hero-title" style="font-size: 32px; margin-bottom: 8px;">
+            <i class="bi bi-broadcast me-2"></i>Live Ambulance Tracking
+          </h2>
+          <p class="about-hero-text" style="margin-bottom: 0;">
+            Watch the whole 10-unit fleet move in real time across Khairpur ·
+            <span class="live-badge"><span class="live-dot"></span>LIVE</span>
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-4 d-none d-lg-block text-end">
+        <button class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-semibold" onclick="recenterMap()">
+          <i class="bi bi-crosshair me-1"></i> Recenter Map
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CONTENT (SMART & BALANCED) ================= -->
+<div class="container section-padding" style="padding-top: 28px; padding-bottom: 45px;">
+  <div class="row g-3 fleet-workspace-row">
+    
+    <!-- Fleet Map (7 Columns for ample map visibility) -->
+    <div class="col-lg-7 d-flex flex-column">
+      <div class="content-card d-flex flex-column h-100">
+        <div class="admin-card-header">
+          <div class="admin-card-header-left">
+            <div class="admin-card-icon"><i class="bi bi-map"></i></div>
+            <div>
+              <h5>Fleet Map</h5>
+              <p id="fleetCounts">Loading live telemetry…</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-0 map-container-box">
+          <div id="fleetMap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fleet Status (5 Columns, 100% Fixed Table, ZERO Horizontal Scroll) -->
+    <div class="col-lg-5 d-flex flex-column">
+      <div class="content-card d-flex flex-column h-100">
+        <div class="admin-card-header">
+          <div class="admin-card-header-left">
+            <div class="admin-card-icon"><i class="bi bi-list-check"></i></div>
+            <div>
+              <h5>Fleet Status</h5>
+              <p>Unit · Status · Case · ETA</p>
+            </div>
+          </div>
+          <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-2 py-1 small" id="unitPillCount">10 Units</span>
+        </div>
+        <div class="card-body p-0 table-container-box">
+          <div class="fleet-scroll-area">
+            <table class="fleet-smart-table" id="fleetTable">
+              <thead>
+                <tr>
+                  <th style="width: 26%;">Unit</th>
+                  <th style="width: 28%;">Status</th>
+                  <th style="width: 28%;">Case</th>
+                  <th style="width: 18%;" class="text-end">ETA</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colspan="4" class="text-center text-muted py-5">
+                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                    Loading units…
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer class="site-footer">
+  <div class="container text-center">
+    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03</p>
+    <p class="mb-0 powered-by">Powered by <strong>Musafir Devs</strong></p>
+  </div>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  /* ===== Mobile Sidebar Handlers ===== */
+  const sidebar = document.getElementById('mobileSidebar');
+  const sidebarOverlay = document.getElementById('mobileSidebarOverlay');
+  const hamburger = document.getElementById('mobileHamburger');
+  function openSidebar() {
+    sidebar.classList.add('open'); sidebarOverlay.classList.add('open');
+    hamburger.classList.add('active'); document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open');
+    hamburger.classList.remove('active'); document.body.style.overflow = '';
+  }
+  hamburger?.addEventListener('click', e => { e.preventDefault(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+  document.getElementById('mobileSidebarClose')?.addEventListener('click', e => { e.preventDefault(); closeSidebar(); });
+  sidebarOverlay?.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+  /* ===== Live Fleet Map ===== */
+  const API = "{{ url_for('ambulances_live') }}";
+  let map, markers = {}, initialized = false;
+
+  function initMap() {
+    map = L.map('fleetMap').setView([27.53, 68.76], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    initialized = true;
+  }
+
+  function recenterMap() {
+    if (map) {
+      map.setView([27.53, 68.76], 12, { animate: true });
+    }
+  }
+
+  function focusUnit(id) {
+    if (markers[id] && map) {
+      const pos = markers[id].getLatLng();
+      map.flyTo(pos, 15, { duration: 1 });
+      markers[id].openPopup();
+
+      document.querySelectorAll('#fleetTable tbody tr').forEach(r => r.classList.remove('active-unit'));
+      const activeRow = document.getElementById('unit-row-' + id);
+      if (activeRow) activeRow.classList.add('active-unit');
+    }
+  }
+
+  function getMarkerHtml(status) {
+    let cls = 'fmarker-ready';
+    let icon = '<i class="bi bi-truck-front-fill"></i>';
+    if (status === 'On the way') {
+      cls = 'fmarker-onway';
+      icon = '<i class="bi bi-broadcast"></i>';
+    } else if (status === 'Occupied') {
+      cls = 'fmarker-busy';
+      icon = '<i class="bi bi-hospital-fill"></i>';
+    }
+    return L.divIcon({
+      className: '',
+      html: `<div class="fleet-marker-icon ${cls}">${icon}</div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    });
+  }
+
+  async function poll() {
+    try {
+      const res = await fetch(API);
+      const d = await res.json();
+      if (!initialized) initMap();
+
+      document.getElementById('fleetCounts').textContent =
+        `${d.counts.available} available · ${d.counts.on_the_way} on the way · ${d.counts.occupied} occupied · ${d.counts.total} total`;
+      document.getElementById('unitPillCount').textContent = `${d.counts.total} Units`;
+
+      const tbody = document.querySelector('#fleetTable tbody');
+      tbody.innerHTML = '';
+
+      d.ambulances.forEach(a => {
+        const pos = [a.position.lat, a.position.lng];
+
+        if (markers[a.id]) {
+          markers[a.id].setLatLng(pos);
+          markers[a.id].setIcon(getMarkerHtml(a.status));
+        } else {
+          markers[a.id] = L.marker(pos, {
+            icon: getMarkerHtml(a.status)
+          }).addTo(map);
+        }
+
+        let popup = `
+          <div class="amb-popup">
+            <strong>${a.unit}</strong> (${a.type || 'BLS'})<br>
+            Status: <strong>${a.status}</strong>
+        `;
+        if (a.case) {
+          popup += `
+            <br>Case: <strong>${a.case.code}</strong> — ${a.case.patient} (${a.case.priority})
+            ${a.case.doctor ? `<br>Doctor: ${a.case.doctor}` : ''}
+            ${a.case.bed ? `<br>Bed: ${a.case.bed}` : ''}
+          `;
+          if (a.patient && !markers['p' + a.id]) {
+            markers['p' + a.id] = L.marker([a.patient.lat, a.patient.lng], {
+              icon: L.divIcon({className: '', html: '📍', iconSize: [26, 26]})
+            }).addTo(map).bindPopup(`Patient pickup — ${a.case.code}`);
+          }
+          if (a.hospital_pos && !markers['h' + a.id]) {
+            markers['h' + a.id] = L.marker([a.hospital_pos.lat, a.hospital_pos.lng], {
+              icon: L.divIcon({className: '', html: '🏥', iconSize: [26, 26]})
+            }).addTo(map).bindPopup(a.hospital_pos.name);
+          }
+        }
+        popup += '</div>';
+        markers[a.id].bindPopup(popup);
+
+        // Status pill
+        let statusBadge = '';
+        if (a.status === 'Available') {
+          statusBadge = `<span class="badge-status-ready">Available</span>`;
+        } else if (a.status === 'On the way') {
+          statusBadge = `<span class="badge-status-onway">On the way</span>`;
+        } else {
+          statusBadge = `<span class="badge-status-busy">Occupied</span>`;
+        }
+
+        // Case info
+        let caseCell = '<span class="text-muted">—</span>';
+        if (a.case) {
+          caseCell = `<strong class="text-primary">${a.case.code}</strong> <span class="text-muted small text-truncate d-inline-block" style="max-width:80px; vertical-align:bottom;" title="${a.case.patient}">${a.case.patient}</span>`;
+        }
+
+        // ETA info
+        let etaCell = '<span class="text-muted">—</span>';
+        if (a.phase === 'arrived') {
+          etaCell = `<span class="arrived-tag"><i class="bi bi-check2"></i> Arrived</span>`;
+        } else if (a.eta_min != null) {
+          etaCell = `<span class="eta-tag">${a.eta_min} min</span>`;
+        }
+
+        const tr = document.createElement('tr');
+        tr.id = 'unit-row-' + a.id;
+        tr.onclick = () => focusUnit(a.id);
+        tr.innerHTML = `
+          <td>
+            <span class="unit-code-tag">${a.unit}</span>
+            <span class="unit-sub-type">${a.type || 'BLS'}</span>
+          </td>
+          <td>${statusBadge}</td>
+          <td>${caseCell}</td>
+          <td class="text-end">${etaCell}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  poll();
+  setInterval(poll, 2500);
+</script>
+{% endblock %}

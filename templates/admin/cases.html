@@ -1,0 +1,603 @@
+{% extends "base.html" %}
+{% block title %}Cases - MedCare Khairpur{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --adm-navy: #1F3971;
+    --adm-navy-dark: #122448;
+    --adm-red: #e53935;
+    --adm-yellow: #FFAE27;
+    --adm-green: #10b981;
+    --adm-border: #e2e8f0;
+    --adm-bg: #f6f8fc;
+  }
+
+  body {
+    background-color: var(--adm-bg);
+  }
+
+  /* ===== Card Shells & Headers ===== */
+  .content-card {
+    background: #ffffff;
+    border: 1px solid var(--adm-border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  }
+  .admin-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 22px;
+    background: linear-gradient(135deg, #102146 0%, #1F3971 70%, #294c96 100%);
+    color: #fff;
+  }
+  .admin-card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .admin-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 174, 39, 0.16);
+    border: 1px solid rgba(255, 174, 39, 0.35);
+    color: #FFAE27;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+  .admin-card-header h5 {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.01em;
+    color: #fff;
+  }
+  .admin-card-header p {
+    margin: 2px 0 0;
+    font-size: 0.76rem;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  /* Header Filter Dropdown */
+  .filter-select {
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+  .filter-select:hover, .filter-select:focus {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: #ffffff;
+  }
+  .filter-select option {
+    background: #ffffff;
+    color: #0f172a;
+  }
+
+  /* ===== Form Styles (Clean & Smart) ===== */
+  .register-form {
+    padding: 22px 20px;
+  }
+  .form-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+    display: block;
+  }
+  .form-control, .form-select {
+    border: 1.5px solid var(--adm-border);
+    border-radius: 10px;
+    padding: 10px 13px;
+    font-size: 0.9rem;
+    background: #fbfcfe;
+    color: #0f172a;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: var(--adm-navy);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(31, 57, 113, 0.10);
+    outline: none;
+  }
+  textarea.form-control {
+    resize: vertical;
+    min-height: 72px;
+  }
+  .btn-admin-primary {
+    width: 100%;
+    background: linear-gradient(135deg, #102146 0%, #1F3971 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(31, 57, 113, 0.25);
+    transition: all 0.25s ease;
+  }
+  .btn-admin-primary:hover {
+    background: linear-gradient(135deg, #1F3971 0%, #294c96 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(31, 57, 113, 0.35);
+  }
+
+  /* ===== Table Styles (Executive Medical) ===== */
+  .table-modern {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .table-modern thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 13px 18px;
+    border-bottom: 1px solid #e2e8f0 !important;
+    white-space: nowrap;
+  }
+  .table-modern tbody tr {
+    transition: background-color 0.15s ease;
+  }
+  .table-modern tbody tr:hover {
+    background-color: #f8fafc;
+  }
+  .table-modern tbody td {
+    padding: 14px 18px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    font-size: 0.88rem;
+  }
+  .table-modern tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Monospace Case Code Badge */
+  .case-code-badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-weight: 700;
+    font-size: 0.84rem;
+    color: var(--adm-navy);
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    padding: 3px 9px;
+    border-radius: 8px;
+  }
+
+  /* Patient Avatar & Details */
+  .patient-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .patient-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    color: #3730a3;
+    font-weight: 700;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .patient-name {
+    font-weight: 600;
+    color: #0f172a;
+    text-transform: capitalize;
+  }
+
+  /* Priority Badges */
+  .priority-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .priority-pill-critical {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+  }
+  .priority-pill-high {
+    background: #fff7ed;
+    color: #ea580c;
+    border: 1px solid #fed7aa;
+  }
+  .priority-pill-medium {
+    background: #fefce8;
+    color: #ca8a04;
+    border: 1px solid #fef08a;
+  }
+  .priority-pill-low {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+  }
+  .priority-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .dot-critical { background: #dc2626; }
+  .dot-high     { background: #ea580c; }
+  .dot-medium   { background: #ca8a04; }
+  .dot-low      { background: #16a34a; }
+
+  /* Status Badges */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    border-radius: 20px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .status-pill-active {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+  }
+  .status-dot-active {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2563eb;
+  }
+  .status-pill-closed {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+  .status-pill-incoming {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+  }
+  .status-pill-dispatched {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+  }
+
+  /* Close Case Button */
+  .btn-close-case {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+  .btn-close-case:hover {
+    background: #10b981;
+    color: #ffffff;
+    border-color: #10b981;
+    transform: translateY(-1px);
+  }
+
+  /* Doctor Assigned Info */
+  .doctor-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    color: #334155;
+  }
+
+  /* Sticky Footer Reset */
+  .site-footer {
+    margin-top: auto !important;
+    margin-bottom: 0 !important;
+  }
+
+  @media (max-width: 767px) {
+    .admin-card-header { padding: 14px 16px; flex-wrap: wrap; }
+    .table-modern { font-size: 0.82rem; }
+    .register-form { padding: 16px 14px; }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+{% include 'admin/_nav.html' %}
+
+<!-- ================= PAGE HERO ================= -->
+<div class="about-hero-area about-hero-small">
+  <div class="about-hero-bg"></div>
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8 col-md-12">
+        <div class="about-hero-content">
+          <h2 class="about-hero-title" style="font-size: 32px; margin-bottom: 8px;">
+            <i class="bi bi-clipboard2-pulse me-2"></i>Emergency Cases
+          </h2>
+          <p class="about-hero-text" style="margin-bottom: 0;">
+            Register, filter and manage all emergency cases in Khairpur
+          </p>
+        </div>
+      </div>
+      <div class="col-lg-4 d-none d-lg-block text-end">
+        <div style="font-size: 4rem; opacity: 0.22; line-height: 1;">📋</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CONTENT ================= -->
+<div class="container section-padding" style="padding-top: 32px; padding-bottom: 50px;">
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show py-2 form-alert mb-4">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="row g-3">
+    
+    <!-- 1. Register New Case (Left Form) -->
+    <div class="col-lg-4">
+      <div class="content-card">
+        <div class="admin-card-header">
+          <div class="admin-card-header-left">
+            <div class="admin-card-icon"><i class="bi bi-plus-circle"></i></div>
+            <div>
+              <h5>Register New Case</h5>
+              <p>Manual intake by staff</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="register-form">
+          <form method="POST">
+            <input type="hidden" name="action" value="add">
+            
+            <div class="mb-3">
+              <label class="form-label">Patient Name</label>
+              <input type="text" name="patient_name" class="form-control" placeholder="Enter patient full name" required>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label">Age</label>
+                <input type="number" name="age" class="form-control" min="0" max="120" placeholder="e.g. 45" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-select" required>
+                  <option value="Critical">Critical</option>
+                  <option value="High">High</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Condition</label>
+              <textarea name="condition" class="form-control" rows="2" placeholder="Describe symptoms or medical urgency..." required></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Address <span class="text-muted fw-normal text-lowercase">(optional)</span></label>
+              <input type="text" name="address" class="form-control" placeholder="Area, street or landmark in Khairpur...">
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label">Lat <span class="text-muted fw-normal text-lowercase">(opt)</span></label>
+                <input type="text" name="lat" class="form-control" placeholder="27.53">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Lng <span class="text-muted fw-normal text-lowercase">(opt)</span></label>
+                <input type="text" name="lng" class="form-control" placeholder="68.76">
+              </div>
+            </div>
+
+            <button type="submit" class="btn-admin-primary mt-2">
+              <i class="bi bi-plus-lg me-2"></i>Register Case
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. All Cases Table (Right Table) -->
+    <div class="col-lg-8">
+      <div class="content-card">
+        <div class="admin-card-header">
+          <div class="admin-card-header-left">
+            <div class="admin-card-icon"><i class="bi bi-journal-medical"></i></div>
+            <div>
+              <h5>All Cases</h5>
+              <p>{{ cases|length }} registered case(s)</p>
+            </div>
+          </div>
+          
+          <form class="d-inline">
+            <select name="priority" class="filter-select" onchange="this.form.submit()">
+              <option value="all" {% if priority_filter=='all' %}selected{% endif %}>All Priorities</option>
+              <option value="Critical" {% if priority_filter=='Critical' %}selected{% endif %}>Critical</option>
+              <option value="High" {% if priority_filter=='High' %}selected{% endif %}>High</option>
+              <option value="Medium" {% if priority_filter=='Medium' %}selected{% endif %}>Medium</option>
+              <option value="Low" {% if priority_filter=='Low' %}selected{% endif %}>Low</option>
+            </select>
+          </form>
+        </div>
+
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-modern mb-0">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Patient</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                  <th>Assigned Doctor</th>
+                  <th class="text-end">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in cases %}
+                <tr>
+                  <td>
+                    <span class="case-code-badge">{{ c.case_code }}</span>
+                  </td>
+                  <td>
+                    <div class="patient-cell">
+                      <span class="patient-avatar">{{ c.patient_name[:2].upper() }}</span>
+                      <div>
+                        <div class="patient-name">{{ c.patient_name }}</div>
+                        <div class="small text-muted">{{ c.age }} yrs</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    {% if c.priority == 'Critical' %}
+                      <span class="priority-pill priority-pill-critical">
+                        <span class="priority-dot dot-critical"></span>Critical
+                      </span>
+                    {% elif c.priority == 'High' %}
+                      <span class="priority-pill priority-pill-high">
+                        <span class="priority-dot dot-high"></span>High
+                      </span>
+                    {% elif c.priority == 'Medium' %}
+                      <span class="priority-pill priority-pill-medium">
+                        <span class="priority-dot dot-medium"></span>Medium
+                      </span>
+                    {% else %}
+                      <span class="priority-pill priority-pill-low">
+                        <span class="priority-dot dot-low"></span>Low
+                      </span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if c.status == 'Incoming' %}
+                      <span class="status-pill status-pill-incoming"><i class="bi bi-clock-history me-1"></i>Incoming</span>
+                    {% elif c.status == 'Dispatched' %}
+                      <span class="status-pill status-pill-dispatched"><i class="bi bi-send-fill me-1"></i>Dispatched</span>
+                    {% elif c.status == 'Closed' %}
+                      <span class="status-pill status-pill-closed"><i class="bi bi-check-circle-fill text-success me-1"></i>Closed</span>
+                    {% else %}
+                      <span class="status-pill status-pill-active"><span class="status-dot-active me-1"></span>Active</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if c.doctor %}
+                      <div class="doctor-cell">
+                        <i class="bi bi-person-badge text-primary"></i>
+                        <span>{{ c.doctor.name }}</span>
+                      </div>
+                    {% else %}
+                      <span class="text-muted">—</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end">
+                    {% if c.status != 'Closed' %}
+                    <form method="POST" class="d-inline" onsubmit="return confirm('Close this case? Bed, doctor and ambulance will be freed.')">
+                      <input type="hidden" name="action" value="close">
+                      <input type="hidden" name="case_id" value="{{ c.id }}">
+                      <button type="submit" class="btn-close-case">
+                        <i class="bi bi-check2"></i> Close
+                      </button>
+                    </form>
+                    {% else %}
+                      <span class="text-muted small">—</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="6" class="text-center text-muted py-5">
+                    <i class="bi bi-clipboard2-check display-6 d-block mb-2 opacity-50"></i>
+                    <div class="fw-semibold">No cases found</div>
+                    <div class="small">No cases registered under this priority filter.</div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer class="site-footer">
+  <div class="container text-center">
+    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03</p>
+    <p class="mb-0 powered-by">Powered by <strong>Musafir Devs</strong></p>
+  </div>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  /* ===== Mobile sidebar ===== */
+  const sidebar = document.getElementById('mobileSidebar');
+  const sidebarOverlay = document.getElementById('mobileSidebarOverlay');
+  const hamburger = document.getElementById('mobileHamburger');
+  function openSidebar() {
+    sidebar.classList.add('open'); sidebarOverlay.classList.add('open');
+    hamburger.classList.add('active'); document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open');
+    hamburger.classList.remove('active'); document.body.style.overflow = '';
+  }
+  hamburger?.addEventListener('click', e => { e.preventDefault(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
+  document.getElementById('mobileSidebarClose')?.addEventListener('click', e => { e.preventDefault(); closeSidebar(); });
+  sidebarOverlay?.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+</script>
+{% endblock %}
