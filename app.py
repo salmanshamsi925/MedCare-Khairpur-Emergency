@@ -1011,12 +1011,6 @@ def seed_data():
     for code, btype in [('B001', 'ICU'), ('B002', 'ICU'), ('B003', 'Emergency'), ('B004', 'Emergency'),
                         ('B005', 'General'), ('B006', 'General'), ('B007', 'General'), ('B008', 'Isolation')]:
         db.session.add(Bed(bed_code=code, bed_type=btype, status='Available'))
-    db.session.add(Case(case_code='C001', patient_name='Imran Siddiqui', age=54, priority='High',
-        condition='Chest pain, suspected cardiac event', status='Active',
-        patient_address='Sir Syed Town, Khairpur', patient_lat=27.5320, patient_lng=68.7590))
-    db.session.add(Case(case_code='C002', patient_name='Zainab Fatima', age=28, priority='Medium',
-        condition='High fever and dehydration', status='Active',
-        patient_address='Faiz Ganj Road, Khairpur', patient_lat=27.5410, patient_lng=68.7710))
     db.session.commit()
     print(f'Database seeded successfully with {TOTAL_AMBULANCES} ambulances.')
 
