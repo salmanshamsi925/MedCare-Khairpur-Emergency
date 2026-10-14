@@ -707,6 +707,20 @@
           </a>
         </div>
 
+        {% if cases %}
+        <form method="POST" action="{{ url_for('admin_cases') }}" class="d-inline"
+              data-confirm="Are you sure you want to permanently delete all {{ cases|length }} emergency cases? All assigned hospital beds, doctors, and ambulances will be freed."
+              data-confirm-title="Clear All Cases"
+              data-confirm-badge="TOTAL CASES: {{ cases|length }}"
+              data-confirm-btn="Yes, Clear All"
+              data-confirm-type="danger">
+          <input type="hidden" name="action" value="clear_all">
+          <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 text-white bg-danger bg-opacity-25" style="font-size: 0.8rem;" title="Permanently delete all cases">
+            <i class="bi bi-trash3-fill"></i> Clear All
+          </button>
+        </form>
+        {% endif %}
+
         <label class="text-white-50 small mb-0 d-none d-md-inline ms-1">Filter Priority:</label>
         <form class="d-inline">
           <select name="priority" class="filter-select" onchange="this.form.submit()">
@@ -805,7 +819,7 @@
 
                   <!-- 2. Close Button (if active) -->
                   {% if c.status != 'Closed' %}
-                  <form method="POST" class="d-inline"
+                  <form method="POST" action="{{ url_for('admin_cases') }}" class="d-inline"
                         data-confirm="Close case <strong>{{ c.case_code }}</strong>? The assigned hospital bed, doctor, and ambulance will be freed."
                         data-confirm-title="Close Emergency Case"
                         data-confirm-badge="CASE: {{ c.case_code }} · {{ c.patient_name }}"
@@ -820,7 +834,7 @@
                   {% endif %}
 
                   <!-- 3. Delete Button -->
-                  <form method="POST" class="d-inline"
+                  <form method="POST" action="{{ url_for('admin_cases') }}" class="d-inline"
                         data-confirm="Are you sure you want to permanently delete case <strong>{{ c.case_code }}</strong>? All allocated emergency resources will be freed."
                         data-confirm-title="Delete Case Record"
                         data-confirm-badge="CASE: {{ c.case_code }} · {{ c.patient_name }}"
@@ -962,7 +976,7 @@
 
                   <!-- Modal Footer (Compact) -->
                   <div class="modal-footer bg-white border-top py-2 px-3 d-flex justify-content-between">
-                    <form method="POST" class="m-0"
+                    <form method="POST" action="{{ url_for('admin_cases') }}" class="m-0"
                           data-confirm="Are you sure you want to permanently delete case <strong>{{ c.case_code }}</strong>? This action cannot be undone."
                           data-confirm-title="Delete Case Record"
                           data-confirm-badge="CASE: {{ c.case_code }} · {{ c.patient_name }}"
@@ -984,7 +998,7 @@
                         <i class="bi bi-box-arrow-up-right text-primary"></i>
                       </a>
                       {% if c.status != 'Closed' %}
-                      <form method="POST" class="m-0"
+                      <form method="POST" action="{{ url_for('admin_cases') }}" class="m-0"
                             data-confirm="Close case <strong>{{ c.case_code }}</strong> and free all assigned emergency resources?"
                             data-confirm-title="Close Emergency Case"
                             data-confirm-badge="CASE: {{ c.case_code }} · {{ c.patient_name }}"

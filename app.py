@@ -621,20 +621,30 @@ def admin_cases():
                 db.session.commit()
                 flash('Case closed and resources freed.', 'success')
         elif action == 'delete':
-            c = Case.query.get(int(request.form['case_id']))
-            if c:
-                code = c.case_code
-                Bed.query.filter_by(assigned_case_id=c.id).update({'status': 'Available', 'assigned_case_id': None})
-                if c.assigned_doctor_id:
-                    doc = User.query.get(c.assigned_doctor_id)
-                    if doc: doc.status = 'Available'
-                if c.assigned_ambulance_id:
-                    amb = User.query.get(c.assigned_ambulance_id)
-                    if amb: amb.status = 'Available'
-                db.session.delete(c)
-                db.session.commit()
-                flash(f'Case {code} permanently deleted and resources freed.', 'success')
-        return redirect(url_for('admin_cases'))
+            case_id = request.form.get('case_id')
+            if case_id:
+                c = Case.query.get(int(case_id))
+                if c:
+                    code = c.case_code
+                    Bed.query.filter_by(assigned_case_id=c.id).update({'status': 'Available', 'assigned_case_id': None})
+                    if c.assigned_doctor_id:
+                        doc = User.query.get(c.assigned_doctor_id)
+                        if doc: doc.status = 'Available'
+                    if c.assigned_ambulance_id:
+                        amb = User.query.get(c.assigned_ambulance_id)
+                        if amb: amb.status = 'Available'
+                    db.session.delete(c)
+                    db.session.commit()
+                    flash(f'Case {code} permanently deleted and resources freed.', 'success')
+            return redirect(url_for('admin_cases'))
+        elif action == 'clear_all':
+            Bed.query.update({'status': 'Available', 'assigned_case_id': None})
+            User.query.filter_by(role='doctor').update({'status': 'Available'})
+            User.query.filter_by(role='ambulance').update({'status': 'Available'})
+            Case.query.delete()
+            db.session.commit()
+            flash('All cases have been permanently deleted and all resources freed.', 'success')
+            return redirect(url_for('admin_cases'))
     priority_filter = request.args.get('priority', 'all')
     q = Case.query.order_by(Case.registered_at.desc())
     if priority_filter != 'all':
@@ -1015,12 +1025,6 @@ def seed_data():
     for code, btype in [('B001', 'ICU'), ('B002', 'ICU'), ('B003', 'Emergency'), ('B004', 'Emergency'),
                         ('B005', 'General'), ('B006', 'General'), ('B007', 'General'), ('B008', 'Isolation')]:
         db.session.add(Bed(bed_code=code, bed_type=btype, status='Available'))
-    db.session.add(Case(case_code='C001', patient_name='Imran Siddiqui', age=54, priority='High',
-        condition='Chest pain, suspected cardiac event', status='Active',
-        patient_address='Sir Syed Town, Khairpur', patient_lat=27.5320, patient_lng=68.7590))
-    db.session.add(Case(case_code='C002', patient_name='Zainab Fatima', age=28, priority='Medium',
-        condition='High fever and dehydration', status='Active',
-        patient_address='Faiz Ganj Road, Khairpur', patient_lat=27.5410, patient_lng=68.7710))
     db.session.commit()
     print(f'Database seeded successfully with {TOTAL_AMBULANCES} ambulances.')
 

@@ -132,7 +132,17 @@
         const modalEl = document.getElementById('smartConfirmModal');
         const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
-        f.submit();
+        
+        // Reliably submit form using requestSubmit or prototype call
+        try {
+          if (typeof f.requestSubmit === 'function') {
+            f.requestSubmit();
+            return;
+          }
+        } catch (e) {
+          console.warn('requestSubmit error, falling back:', e);
+        }
+        HTMLFormElement.prototype.submit.call(f);
       }
     });
 
