@@ -124,6 +124,21 @@
     transform: translateY(-1px);
   }
 
+  .btn-pdf {
+    background: linear-gradient(135deg, #102146 0%, #1F3971 100%);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 174, 39, 0.45);
+    box-shadow: 0 4px 14px rgba(16, 33, 70, 0.22);
+  }
+  .btn-pdf:hover {
+    background: linear-gradient(135deg, #1F3971 0%, #294c96 100%);
+    color: #FFAE27;
+    border-color: #FFAE27;
+    transform: translateY(-1px);
+  }
+  .btn-pdf i { color: #FFAE27; }
+
+
   /* ================= MAIN CONTENT WRAPPER ================= */
   .dashboard-main-content {
     padding: 20px 24px 36px;
@@ -482,6 +497,10 @@
     </p>
   </div>
   <div class="topbar-right">
+    <a href="{{ url_for('export_cases_pdf') }}" class="btn-topbar-action btn-pdf" target="_blank" title="Export Official PDF Report of Cases">
+      <i class="bi bi-file-earmark-pdf-fill"></i>
+      <span>Export Cases PDF</span>
+    </a>
     <a href="{{ url_for('admin_track') }}" class="btn-topbar-action btn-radar">
       <i class="bi bi-broadcast"></i>
       <span>Live Fleet Radar</span>
@@ -492,6 +511,7 @@
     </a>
   </div>
 </header>
+
 
 <!-- ================= MAIN WORKSPACE (FITS THE SCREEN) ================= -->
 <main class="dashboard-main-content">
@@ -607,6 +627,10 @@
         </div>
       </div>
       <div class="d-flex align-items-center gap-2">
+        <a href="{{ url_for('export_cases_pdf') }}" class="btn btn-sm btn-outline-light rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1" target="_blank" title="Export Cases Registry as PDF">
+          <i class="bi bi-file-earmark-pdf-fill text-warning"></i>
+          <span>PDF Report</span>
+        </a>
         <span class="badge bg-white bg-opacity-10 text-white border border-white border-opacity-25 px-3 py-1 rounded-pill small d-none d-sm-inline-flex">
           <span class="live-dot-pulse me-1"></span> Live Feed ({{ recent|length }})
         </span>
@@ -616,6 +640,7 @@
         </a>
       </div>
     </div>
+
     
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -696,10 +721,16 @@
                 <span class="small text-muted">{{ c.registered_at.strftime('%d %b %H:%M') }}</span>
               </td>
               <td class="text-end">
-                <a href="{{ url_for('admin_cases') }}" class="btn-table-action" title="View details in Cases">
-                  <i class="bi bi-arrow-right-short"></i>
-                </a>
+                <div class="d-inline-flex align-items-center gap-1 justify-content-end">
+                  <a href="{{ url_for('export_case_slip_pdf', case_code=c.case_code) }}" class="btn-table-action text-danger" title="Download Case Slip (PDF)">
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                  </a>
+                  <a href="{{ url_for('admin_cases') }}" class="btn-table-action" title="View details in Cases">
+                    <i class="bi bi-arrow-right-short"></i>
+                  </a>
+                </div>
               </td>
+
             </tr>
             {% else %}
             <tr>

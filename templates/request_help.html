@@ -138,6 +138,10 @@
                   </select>
                 </div>
                 <div class="fg-full">
+                  <label class="form-label">Contact / Mobile Phone *</label>
+                  <input type="text" name="phone" class="form-control" placeholder="e.g. 0300-1234567 (Ambulance driver will call on this number)" required>
+                </div>
+                <div class="fg-full">
                   <label class="form-label">Condition / Symptoms *</label>
                   <textarea name="condition" class="form-control" rows="3" required
                     placeholder="Brief description of the emergency (chest pain, accident, fever...)"></textarea>
@@ -386,7 +390,21 @@
         addMessage("Emergency kiya hai? Briefly describe the condition / symptoms.", 'bot');
         break;
       case 'condition':
-        d.condition = val;
+        if (!val || !val.trim()) { addMessage('Barah-e-karam emergency ya symptoms tafseel se likhein.', 'bot'); break; }
+        d.condition = val.trim();
+        flow.step = 'phone';
+        addMessage("<strong>Mobile / Contact number kya hai?</strong><br><small class='text-muted'>Ambulance driver aur coordination ke liye lazmi hai (e.g. 0300-1234567)</small>", 'bot');
+        if (aiInput) aiInput.placeholder = "e.g. 0300-1234567 (Mobile Number)...";
+        break;
+      case 'phone':
+        const cleanPhone = (val || '').trim();
+        const digits = cleanPhone.replace(/\D/g, '');
+        if (digits.length < 7) {
+          addMessage("⚠️ Barah-e-karam durust mobile number darj karein taake ambulance team rabta kar sake (e.g. 0300-1234567):", 'bot');
+          break;
+        }
+        d.patient_phone = cleanPhone;
+        if (aiInput) aiInput.placeholder = "Type patient details, symptoms, or question...";
         flow.step = 'priority';
         addMessage("Kitni severity hai? (How severe is it?)", 'bot');
         quickReply([

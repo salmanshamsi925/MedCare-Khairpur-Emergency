@@ -499,7 +499,21 @@
         addMessage("Emergency kiya hai? Briefly describe the condition / symptoms.", 'bot');
         break;
       case 'condition':
-        d.condition = val;
+        if (!val || !val.trim()) { addMessage('Barah-e-karam emergency ya symptoms tafseel se likhein.', 'bot'); break; }
+        d.condition = val.trim();
+        flow.step = 'phone';
+        addMessage("<strong>Mobile / Contact number kya hai?</strong><br><small class='text-muted'>Ambulance driver aur coordination ke liye lazmi hai (e.g. 0300-1234567)</small>", 'bot');
+        if (aiInput) aiInput.placeholder = "e.g. 0300-1234567 (Mobile Number)...";
+        break;
+      case 'phone':
+        const cleanPhone = (val || '').trim();
+        const digits = cleanPhone.replace(/\D/g, '');
+        if (digits.length < 7) {
+          addMessage("⚠️ Barah-e-karam durust mobile number darj karein taake ambulance team rabta kar sake (e.g. 0300-1234567):", 'bot');
+          break;
+        }
+        d.patient_phone = cleanPhone;
+        if (aiInput) aiInput.placeholder = "Type patient details, symptoms, or question...";
         flow.step = 'priority';
         addMessage("Kitni severity hai? (How severe is it?)", 'bot');
         quickReply([
@@ -622,10 +636,18 @@
         }
         if (a.doctor) msg += '👨‍⚕️ Doctor assigned: <strong>' + a.doctor + '</strong><br>';
         if (a.bed) msg += '🛏️ Bed reserved: <strong>' + a.bed + '</strong><br>';
+        if (flow.data.patient_phone) {
+          msg += '📞 Contact: <strong>' + flow.data.patient_phone + '</strong> (Dispatch team will call on this number)<br>';
+        }
         msg += '📦 Ambulances still available: <strong>' + a.ambulances_available + ' / 10</strong><br>' +
-          '<a href="' + data.track_url + '" class="btn btn-sm btn-primary mt-2"><i class="bi bi-map me-1"></i>Watch Ambulance Moving on Map</a>';
+          '<div class="d-flex gap-2 mt-2 flex-wrap">' +
+          '<a href="' + data.track_url + '" class="btn btn-sm btn-primary"><i class="bi bi-map me-1"></i>Track Ambulance on Map</a>' +
+          '<a href="' + (data.pdf_url || ('/case/' + data.case_code + '/pdf')) + '" class="btn btn-sm btn-danger" target="_blank"><i class="bi bi-file-earmark-pdf-fill me-1"></i>Download Slip (PDF)</a>' +
+          '</div>';
         addMessage(msg, 'bot');
+
         chatArea.scrollTop = chatArea.scrollHeight;
+        if (aiInput) aiInput.placeholder = "Type patient details, symptoms, or question...";
         flow = null;
       } else {
         addMessage('⚠️ Something went wrong. Please try again or use the Request Help page.', 'bot');

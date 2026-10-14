@@ -138,6 +138,21 @@
   }
   .btn-allocate:hover { background: #f8fafc; color: #1F3971; transform: translateY(-1px); }
 
+  .btn-pdf {
+    background: linear-gradient(135deg, #102146 0%, #1F3971 100%);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 174, 39, 0.45);
+    box-shadow: 0 4px 14px rgba(16, 33, 70, 0.22);
+  }
+  .btn-pdf:hover {
+    background: linear-gradient(135deg, #1F3971 0%, #294c96 100%);
+    color: #FFAE27;
+    border-color: #FFAE27;
+    transform: translateY(-1px);
+  }
+  .btn-pdf i { color: #FFAE27; }
+
+
   .dashboard-main-content {
     padding: 18px 24px 32px;
     flex: 1;
@@ -364,6 +379,10 @@
     </p>
   </div>
   <div class="topbar-right">
+    <a href="{{ url_for('export_resources_pdf') }}" class="btn-topbar-action btn-pdf" target="_blank" title="Export Resource Inventory & Readiness Audit PDF">
+      <i class="bi bi-file-earmark-pdf-fill"></i>
+      <span>Export Resource Audit (PDF)</span>
+    </a>
     <a href="{{ url_for('admin_allocate') }}" class="btn-topbar-action btn-allocate">
       <i class="bi bi-magic text-warning"></i>
       <span>Smart Allocate</span>
@@ -374,6 +393,7 @@
     </a>
   </div>
 </header>
+
 
 <!-- ================= MAIN CONTENT ================= -->
 <main class="dashboard-main-content">
@@ -517,10 +537,20 @@
       </li>
     </ul>
 
-    <!-- Compact Sync Notification -->
-    <div class="d-none d-md-flex align-items-center gap-2 text-muted small bg-white border px-3 py-2 rounded-3">
-      <i class="bi bi-arrow-repeat text-primary"></i>
-      <span>Allocated beds & doctors auto-update and release on case close.</span>
+    <!-- Compact Sync Notification & Audit PDF Export -->
+    <div class="d-none d-md-flex align-items-center gap-2">
+      <div class="d-inline-flex align-items-center">
+        <a href="{{ url_for('export_resources_pdf') }}" class="btn btn-outline-danger btn-sm py-1 px-3 fw-semibold d-inline-flex align-items-center gap-1" title="Download Resource Audit Report as PDF">
+          <i class="bi bi-file-earmark-pdf-fill"></i> Audit PDF
+        </a>
+        <a href="{{ url_for('export_resources_pdf', view='1') }}" target="_blank" class="btn btn-light border btn-sm py-1 px-2" title="Preview PDF in New Tab">
+          <i class="bi bi-box-arrow-up-right text-primary"></i>
+        </a>
+      </div>
+      <div class="text-muted small bg-white border px-3 py-2 rounded-3">
+        <i class="bi bi-arrow-repeat text-primary me-1"></i>
+        <span>Allocated beds & doctors auto-update and release on case close.</span>
+      </div>
     </div>
   </div>
 
@@ -588,7 +618,12 @@
                         <option value="Occupied" {% if b.status=='Occupied' %}selected{% endif %}>🔴 Occupied</option>
                       </select>
                     </form>
-                    <form method="POST" action="{{ url_for('delete_resource') }}" class="d-inline m-0 ms-1" onsubmit="return confirm('Permanently remove bed {{ b.bed_code }}?')">
+                    <form method="POST" action="{{ url_for('delete_resource') }}" class="d-inline m-0 ms-1"
+                          data-confirm="Are you sure you want to permanently remove bed <strong>{{ b.bed_code }}</strong> ({{ b.bed_type }})?"
+                          data-confirm-title="Remove Bed"
+                          data-confirm-badge="BED: {{ b.bed_code }}"
+                          data-confirm-btn="Yes, Remove"
+                          data-confirm-type="danger">
                       <input type="hidden" name="type" value="bed">
                       <input type="hidden" name="id" value="{{ b.id }}">
                       <button type="submit" class="btn-action-delete" title="Delete Bed">
@@ -672,7 +707,12 @@
                         <option value="On-call" {% if d.status=='On-call' %}selected{% endif %}>🟡 On-call</option>
                       </select>
                     </form>
-                    <form method="POST" action="{{ url_for('delete_resource') }}" class="d-inline m-0 ms-1" onsubmit="return confirm('Remove doctor {{ d.name }}?')">
+                    <form method="POST" action="{{ url_for('delete_resource') }}" class="d-inline m-0 ms-1"
+                          data-confirm="Are you sure you want to remove <strong>{{ d.name }}</strong> ({{ d.specialty or 'Doctor' }}) from active duty roster?"
+                          data-confirm-title="Remove Doctor"
+                          data-confirm-badge="DOCTOR: {{ d.name }}"
+                          data-confirm-btn="Yes, Remove"
+                          data-confirm-type="danger">
                       <input type="hidden" name="type" value="doctor">
                       <input type="hidden" name="id" value="{{ d.id }}">
                       <button type="submit" class="btn-action-delete" title="Delete Doctor">
@@ -759,7 +799,12 @@
                         <option value="Occupied" {% if a.status=='Occupied' %}selected{% endif %}>🔴 Occupied</option>
                       </select>
                     </form>
-                    <form method="POST" action="{{ url_for('delete_resource') }}" class="d-inline m-0 ms-1" onsubmit="return confirm('Remove ambulance unit {{ a.vehicle_id or a.name }}?')">
+                    <form method="POST" action="{{ url_for('delete_resource') }}" class="d-inline m-0 ms-1"
+                          data-confirm="Are you sure you want to remove ambulance unit <strong>{{ a.vehicle_id or a.name }}</strong> from the emergency fleet?"
+                          data-confirm-title="Remove Ambulance"
+                          data-confirm-badge="UNIT: {{ a.vehicle_id or a.name }}"
+                          data-confirm-btn="Yes, Remove"
+                          data-confirm-type="danger">
                       <input type="hidden" name="type" value="ambulance">
                       <input type="hidden" name="id" value="{{ a.id }}">
                       <button type="submit" class="btn-action-delete" title="Delete Ambulance">

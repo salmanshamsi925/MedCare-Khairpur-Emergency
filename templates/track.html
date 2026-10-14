@@ -1,374 +1,799 @@
 {% extends "base.html" %}
-{% block title %}Tracking {{ case.case_code }} - MedCare Khairpur{% endblock %}
+{% block title %}Live Emergency Telemetry — {{ case.case_code }} | MedCare Khairpur{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  .track-card-header {
-    display: flex; align-items: center; gap: 14px; padding: 20px 24px;
-    background: linear-gradient(120deg, var(--navy), var(--navy-light));
-    color: #fff; border-radius: 12px 12px 0 0;
+  :root {
+    --adm-navy: #1F3971;
+    --adm-navy-dark: #102146;
+    --adm-red: #e53935;
+    --adm-yellow: #FFAE27;
+    --adm-green: #10b981;
+    --adm-border: #e2e8f0;
+    --adm-bg: #f6f8fc;
   }
-  .track-card-icon {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: rgba(255,174,39,0.22); color: var(--yellow);
-    display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;
-  }
-  .track-card-header h5 { margin: 0; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff; }
-  .track-card-header p { margin: 2px 0 0; font-size: 0.78rem; color: rgba(255,255,255,0.75); }
-  .content-card { overflow: hidden; }
 
-  /* ===== Phase stepper (Hospital -> Pickup -> Hospital) ===== */
-  .phase-stepper {
-    display: flex; align-items: center; justify-content: center;
-    gap: 0; margin: 0 auto 22px; max-width: 640px;
+  body {
+    background-color: var(--adm-bg);
+    font-family: 'Poppins', sans-serif;
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
-  .phase-step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
+
+  /* ================= TOP EXECUTIVE APP BAR ================= */
+  .telemetry-navbar {
+    background: linear-gradient(90deg, #102146 0%, #1F3971 100%);
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 2px 12px rgba(16, 33, 70, 0.25);
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+  }
+  .telemetry-navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .brand-badge-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-logo-img {
+    height: 34px;
+    width: auto;
+    background: #ffffff;
+    padding: 3px 8px;
+    border-radius: 8px;
+  }
+  .portal-mode-chip {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-nav-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .btn-nav-back {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  .btn-nav-back:hover {
+    background: #ffffff;
+    color: #102146;
+  }
+  .btn-nav-radar {
+    background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(229, 57, 53, 0.3);
+  }
+  .btn-nav-radar:hover {
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+  .user-badge-chip {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hotline-pill {
+    background: #ef4444;
+    color: #ffffff;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  }
+  .hotline-pill:hover {
+    background: #dc2626;
+    color: #ffffff;
+  }
+
+  /* ================= EXECUTIVE TELEMETRY HERO ================= */
+  .telemetry-hero {
+    background: linear-gradient(135deg, #102146 0%, #173268 65%, #1F3971 100%);
+    color: #ffffff;
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--adm-border);
+    position: relative;
+    overflow: hidden;
+  }
+  .telemetry-hero::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 174, 39, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .case-code-badge {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.82rem;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    padding: 3px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+  }
+  .priority-pill {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .priority-critical { background: #fee2e2; color: #dc2626; }
+  .priority-high     { background: #ffedd5; color: #c2410c; }
+  .priority-medium   { background: #fef9c3; color: #a16207; }
+  .priority-low      { background: #dcfce7; color: #15803d; }
+  .pulse-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: currentColor;
+    animation: beaconPulse 1.4s infinite;
+  }
+  @keyframes beaconPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.4; }
+  }
+
+  .telemetry-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 1.45rem;
+    color: #ffffff;
+    margin: 6px 0 2px 0;
+    letter-spacing: -0.01em;
+  }
+  .telemetry-subtitle {
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+  }
+
+  /* Unified Professional PDF Button (Smart & Clutter-Free) */
+  .pdf-smart-group {
+    display: inline-flex;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 3px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  }
+  .btn-pdf-smart {
+    background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+    color: #ffffff !important;
+    border: none;
+    border-radius: 7px;
+    padding: 7px 16px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.2s ease;
+  }
+  .btn-pdf-smart:hover {
+    background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(229, 57, 53, 0.35);
+  }
+  .btn-pdf-view {
+    background: transparent;
+    color: #102146;
+    border: none;
+    padding: 7px 12px;
+    font-size: 0.84rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+  }
+  .btn-pdf-view:hover {
+    color: #e53935;
+  }
+
+  /* ================= PHASE STEPPER ================= */
+  .stepper-card {
+    background: #ffffff;
+    border: 1px solid var(--adm-border);
+    border-radius: 14px;
+    padding: 18px 24px 14px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  }
+  .phase-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 680px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .phase-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    z-index: 2;
+    flex-shrink: 0;
+  }
   .phase-dot {
-    width: 40px; height: 40px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
-    background: #fff; border: 2px solid var(--border); color: var(--muted);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    background: #f8fafc;
+    border: 2px solid #cbd5e1;
+    color: #64748b;
     transition: all 0.3s ease;
   }
   .phase-step.active .phase-dot {
-    background: var(--navy); border-color: var(--navy); color: #fff;
-    box-shadow: 0 0 0 6px rgba(31,57,113,0.15);
+    background: #1F3971;
+    border-color: #1F3971;
+    color: #ffffff;
+    box-shadow: 0 0 0 6px rgba(31, 57, 113, 0.15);
     animation: phasePulse 1.6s infinite;
   }
-  .phase-step.done .phase-dot { background: #2e7d32; border-color: #2e7d32; color: #fff; }
-  .phase-step span { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-align: center; }
-  .phase-step.active span { color: var(--navy); }
-  .phase-step.done span { color: #2e7d32; }
+  .phase-step.done .phase-dot {
+    background: #10b981;
+    border-color: #10b981;
+    color: #ffffff;
+  }
+  .phase-step span {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #64748b;
+    text-align: center;
+  }
+  .phase-step.active span { color: #1F3971; }
+  .phase-step.done span   { color: #10b981; }
+
   @keyframes phasePulse {
-    0%,100% { box-shadow: 0 0 0 6px rgba(31,57,113,0.15); }
-    50%     { box-shadow: 0 0 0 12px rgba(31,57,113,0.05); }
+    0%, 100% { box-shadow: 0 0 0 5px rgba(31, 57, 113, 0.15); }
+    50%      { box-shadow: 0 0 0 10px rgba(31, 57, 113, 0.05); }
   }
+
   .phase-line {
-    flex: 1 1 auto; height: 3px; min-width: 26px; margin: 0 4px 22px;
-    background: var(--border); border-radius: 2px; position: relative; overflow: hidden;
+    flex: 1 1 auto;
+    height: 4px;
+    margin: 0 8px 22px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    position: relative;
   }
-  .phase-line.done { background: #2e7d32; }
-  .phase-line.active-flow { background: linear-gradient(90deg, #2e7d32, var(--yellow)); }
+  .phase-line.done { background: #10b981; }
+  .phase-line.active-flow {
+    background: linear-gradient(90deg, #10b981, #FFAE27);
+  }
 
-  /* ===== ETA banner ===== */
+  /* ================= ETA TELEMETRY BANNER ================= */
   .eta-banner {
-    display: flex; align-items: center; gap: 14px;
-    background: linear-gradient(120deg, var(--navy), var(--navy-light));
-    border-radius: 12px; padding: 16px 20px; color: #fff; margin-bottom: 22px;
-    border-left: 5px solid var(--yellow);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #102146 0%, #1F3971 100%);
+    border-radius: 14px;
+    padding: 16px 22px;
+    color: #ffffff;
+    margin-bottom: 18px;
+    border-left: 5px solid #FFAE27;
+    box-shadow: 0 4px 16px rgba(16, 33, 70, 0.12);
   }
-  .eta-banner .eta-num {
-    font-family: 'Montserrat', sans-serif; font-size: 2rem; font-weight: 800;
-    color: var(--yellow); line-height: 1;
-    min-width: 90px;
+  .eta-left-box {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    min-width: 100px;
+    flex-shrink: 0;
   }
-  .eta-banner .eta-label { font-size: 0.78rem; color: rgba(255,255,255,0.75); }
-  .eta-banner .eta-phase { font-size: 0.95rem; font-weight: 600; }
+  .eta-num {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #FFAE27;
+    line-height: 1;
+  }
+  .eta-unit {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+  }
+  .eta-info {
+    flex-grow: 1;
+  }
+  .eta-phase {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 2px;
+  }
+  .eta-label {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+  }
 
-  /* ===== Detail rows ===== */
-  .detail-row {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 11px 0; border-bottom: 1px solid #f0f2f5; font-size: 0.88rem;
+  /* ================= CONTENT CARDS ================= */
+  .content-card {
+    background: #ffffff;
+    border: 1px solid var(--adm-border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
   }
-  .detail-row:last-child { border-bottom: none; }
-  .detail-ico {
-    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
+  .track-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #102146 0%, #1F3971 100%);
+    color: #ffffff;
   }
-  .detail-row .dl { color: var(--muted); font-size: 0.76rem; display: block; }
-  .detail-row .dv { font-weight: 600; color: var(--dark); }
-
-  #map, .map-placeholder { border-radius: 0 0 12px 12px; height: 480px; }
-  .map-loading {
-    height: 480px; display: flex; align-items: center; justify-content: center;
-    color: var(--muted); flex-direction: column; gap: 10px;
+  .track-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba(255, 174, 39, 0.18);
+    border: 1px solid rgba(255, 174, 39, 0.35);
+    color: #FFAE27;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .track-card-header h5 {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 0.96rem;
+    color: #ffffff;
+  }
+  .track-card-header p {
+    margin: 2px 0 0;
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.75);
   }
   .live-badge {
-    background: var(--red); color: #fff; font-size: 0.7rem; font-weight: 700;
-    padding: 4px 12px; border-radius: 20px; letter-spacing: 0.5px;
-    display: inline-flex; align-items: center; gap: 6px;
+    background: #e53935;
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    padding: 3px 9px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
   }
   .live-dot {
-    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-    background: #fff; animation: livePulse 1.5s infinite;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ffffff;
+    animation: livePulse 1.5s infinite;
   }
-  @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-  .amb-popup { font-size: 0.85rem; line-height: 1.5; }
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
 
-  @media (max-width: 767px) {
-    #map, .map-placeholder, .map-loading { height: 320px; }
-    .eta-banner { padding: 14px 16px; }
-    .eta-banner .eta-num { font-size: 1.6rem; min-width: 70px; }
-    .phase-dot { width: 34px; height: 34px; font-size: 0.95rem; }
-    .phase-step span { font-size: 0.65rem; }
+  /* Equal-Height Map Container (HCI Layout Fix: Zero Empty Whitespace) */
+  .map-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  #map, .map-loading {
+    min-height: 580px;
+    height: 100%;
+    border-radius: 0 0 14px 14px;
+  }
+  .map-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    flex-direction: column;
+    gap: 12px;
+    background: #f8fafc;
+  }
+
+  /* Detail Rows (Clean & Smart) */
+  .detail-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.86rem;
+  }
+  .detail-row:last-child {
+    border-bottom: none;
+  }
+  .detail-ico {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+  }
+  .dl {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .dv {
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  /* Footer */
+  .telemetry-footer {
+    margin-top: auto;
+    background: #ffffff;
+    border-top: 1px solid var(--adm-border);
+    padding: 14px 0;
+    font-size: 0.78rem;
+    color: #64748b;
+  }
+
+  @media (max-width: 991px) {
+    #map, .map-loading { min-height: 380px; }
+    .eta-banner { flex-direction: column; align-items: flex-start; gap: 8px; }
   }
 </style>
 {% endblock %}
 
 {% block body %}
-<header>
-  <!-- Desktop: logo + nav (sticky on top) -->
-  <div class="header-logo-menu sticker">
-    <div class="container">
-      <div class="row align-items-center">
-        <div class="col-lg-3 col-12">
-          <div class="logo">
-            <a href="{{ url_for('index') }}">
-              <img src="{{ url_for('static', filename='img/logo101.png') }}" alt="MedCare Emergency Logo" class="brand-logo">
-            </a>
-          </div>
-        </div>
-        <div class="col-lg-9 col-12">
-          <div class="mainmenu-area">
-            <nav class="mainmenu d-none d-lg-block">
-              <ul id="nav">
-                <li><a href="{{ url_for('index') }}">Home</a></li>
-                <li><a href="{{ url_for('request_help') }}">Emergency</a></li>
-                <li><a href="{{ url_for('request_help') }}" class="nav-ambulance"><span>🚑</span> Ambulance</a></li>
-                <li><a href="{{ url_for('login') }}" class="nav-login"><i class="bi bi-shield-lock-fill me-1"></i> Admin Login</a></li>
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Mobile: white bar (logo + hamburger) -->
-  <div class="mobile-menu-area">
-    <div class="mobile-topbar-inner">
-      <div class="mobile-logo">
-        <a href="{{ url_for('index') }}">
-          <img src="{{ url_for('static', filename='img/logo101.png') }}" alt="MedCare Emergency Logo" class="brand-logo">
+<!-- ================= EXECUTIVE APP NAVBAR (HCI COMPLIANT) ================= -->
+<header class="telemetry-navbar">
+  <div class="telemetry-navbar-inner">
+    
+    <!-- Left: Brand Logo & Context -->
+    <div class="brand-badge-box">
+      <a href="{% if session.user_id %}{{ url_for('dashboard_redirect') }}{% else %}{{ url_for('index') }}{% endif %}">
+        <img src="{{ url_for('static', filename='img/logo101.png') }}" alt="MedCare Logo" class="brand-logo-img">
+      </a>
+      <span class="portal-mode-chip">
+        <span class="pulse-dot text-warning"></span>
+        {% if session.user_id %}
+          Staff Command Console
+        {% else %}
+          Emergency Dispatch Portal
+        {% endif %}
+      </span>
+    </div>
+
+    <!-- Right: Context-Aware Navigation (NO website clutter!) -->
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      {% if session.user_id %}
+        <!-- Staff is logged in: Provide direct Admin / Staff links -->
+        <a href="{% if session.role == 'doctor' %}{{ url_for('doctor_dashboard') }}{% else %}{{ url_for('admin_cases') }}{% endif %}" class="btn-nav-action btn-nav-back">
+          <i class="bi bi-arrow-left"></i>
+          <span>Back to {% if session.role == 'doctor' %}Dashboard{% else %}Cases{% endif %}</span>
         </a>
-      </div>
-      <div class="mobile-topbar-right">
-        <a href="#" class="mobile-hamburger" id="mobileHamburger" aria-label="Menu">
-          <span></span><span></span><span></span>
+        <a href="{{ url_for('admin_track') }}" class="btn-nav-action btn-nav-radar">
+          <i class="bi bi-broadcast"></i>
+          <span>Fleet Radar</span>
         </a>
-      </div>
+        <span class="user-badge-chip d-none d-md-inline-flex">
+          <i class="bi bi-person-circle text-warning"></i>
+          <span>{{ session.name or 'Staff' }}</span>
+        </span>
+        <a href="{{ url_for('logout') }}" class="btn-nav-action btn-nav-back text-white-50" title="Sign Out">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      {% else %}
+        <!-- Public caller / patient: Provide Emergency Helpline -->
+        <a href="tel:+923001234567" class="hotline-pill">
+          <i class="bi bi-telephone-fill"></i>
+          <span>24/7 Helpline: 1122</span>
+        </a>
+        <a href="{{ url_for('index') }}" class="btn-nav-action btn-nav-back">
+          <i class="bi bi-house-door"></i>
+          <span>Home</span>
+        </a>
+      {% endif %}
     </div>
-  </div>
 
-  <!-- Emergency Contacts strip below Navbar -->
-  <div class="header-top">
-    <div class="container">
-      <div class="row align-items-center">
-        <div class="col-7 col-lg-7">
-          <span class="ht-question d-none d-md-inline"><i class="bi bi-question-circle me-1"></i> Need help? We are 24/7 available</span>
-          <a href="tel:+923001234567" class="ht-phone-mobile d-md-none"><i class="bi bi-telephone-fill me-1"></i> +92 300 1234567</a>
-        </div>
-        <div class="col-5 col-lg-5 text-end">
-          <span class="ht-phone d-none d-md-inline"><i class="bi bi-telephone me-1"></i> +92 300 1234567</span>
-          <span class="ht-emergency d-none d-md-inline"><i class="bi bi-telephone-fill me-1"></i> THE Emergency Contacts</span>
-        </div>
-      </div>
-    </div>
   </div>
-
-  <!-- Mobile slide-out sidebar -->
-  <div class="mobile-sidebar-overlay" id="mobileSidebarOverlay"></div>
-  <aside class="mobile-sidebar" id="mobileSidebar">
-    <div class="mobile-sidebar-header">
-      <span>Menu</span>
-      <a href="#" class="mobile-sidebar-close" id="mobileSidebarClose" aria-label="Close">&times;</a>
-    </div>
-    <nav class="mobile-sidebar-nav">
-      <ul>
-        <li><a href="{{ url_for('index') }}"><i class="bi bi-house-door me-2"></i> Home</a></li>
-        <li><a href="{{ url_for('request_help') }}"><i class="bi bi-exclamation-triangle me-2"></i> Emergency</a></li>
-        <li><a href="{{ url_for('request_help') }}"><span class="me-2">🚑</span> Ambulance</a></li>
-        <li><a href="{{ url_for('login') }}"><i class="bi bi-shield-lock-fill me-2"></i> Admin Login</a></li>
-      </ul>
-    </nav>
-  </aside>
 </header>
 
-<!-- ================= PAGE HERO ================= -->
-<div class="about-hero-area about-hero-small">
-  <div class="about-hero-bg"></div>
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-lg-8 col-md-12">
-        <div class="about-hero-content">
-          <h2 class="about-hero-title" style="font-size: 32px; margin-bottom: 8px;">
-            🚑 Live Tracking — {{ case.case_code }}
-          </h2>
-          <p class="about-hero-text" style="margin-bottom: 0;" id="trackSubtitle">
-            Ambulance is being dispatched — please stay at your location…
-          </p>
+<!-- ================= EXECUTIVE TELEMETRY HERO ================= -->
+<section class="telemetry-hero">
+  <div class="container-fluid px-3 px-md-4">
+    <div class="row align-items-center justify-content-between g-3">
+      
+      <div class="col-lg-8 col-md-7 col-12">
+        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+          <span class="case-code-badge">{{ case.case_code }}</span>
+          <span class="priority-pill priority-{{ case.priority|lower }}">
+            <span class="pulse-dot"></span> {{ case.priority }}
+          </span>
+          <span class="badge bg-light text-dark font-monospace small px-2 py-1">
+            <i class="bi bi-clock me-1"></i>{{ case.registered_at.strftime('%I:%M %p') if case.registered_at else 'Active' }}
+          </span>
+        </div>
+        <h1 class="telemetry-title">
+          Live Dispatch & Telemetry — {{ case.patient_name }} ({{ case.age }} yrs)
+        </h1>
+        <p class="telemetry-subtitle" id="trackSubtitle">
+          Ambulance is being dispatched to location — real-time GPS telemetry active.
+        </p>
+      </div>
+
+      <!-- ONE Smart, Unified Professional PDF Export Button -->
+      <div class="col-lg-4 col-md-5 col-12 text-md-end text-start">
+        <div class="pdf-smart-group">
+          <a href="{{ url_for('export_case_slip_pdf', case_code=case.case_code) }}" class="btn-pdf-smart" target="_blank" title="Download Verified Official Medical Dispatch Slip (PDF)">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Official Slip (PDF)</span>
+          </a>
+          <a href="{{ url_for('export_case_slip_pdf', case_code=case.case_code, view='1') }}" target="_blank" class="btn-pdf-view" title="Preview PDF in New Tab">
+            <i class="bi bi-box-arrow-up-right"></i>
+          </a>
         </div>
       </div>
-      <div class="col-lg-4 d-none d-lg-block">
-        <div class="text-center" style="font-size: 5rem; opacity: 0.25;">🗺️</div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= MAIN TELEMETRY WORKSPACE ================= -->
+<main class="container-fluid px-3 px-md-4 py-3 flex-grow-1">
+
+  <!-- 1. Phase Stepper -->
+  <div class="stepper-card">
+    <div class="phase-stepper" id="phaseStepper">
+      <div class="phase-step active" id="stepHospital">
+        <div class="phase-dot"><i class="bi bi-hospital"></i></div>
+        <span>Departed Hospital</span>
+      </div>
+      <div class="phase-line" id="line1"></div>
+      <div class="phase-step" id="stepPickup">
+        <div class="phase-dot"><i class="bi bi-geo-alt-fill"></i></div>
+        <span>Patient Pickup</span>
+      </div>
+      <div class="phase-line" id="line2"></div>
+      <div class="phase-step" id="stepArrive">
+        <div class="phase-dot"><i class="bi bi-heart-pulse-fill"></i></div>
+        <span>At Hospital</span>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ================= TRACKING ================= -->
-<div class="container section-padding" style="padding-top: 36px; padding-bottom: 50px;">
-  <!-- Phase stepper -->
-  <div class="phase-stepper" id="phaseStepper">
-    <div class="phase-step" id="stepHospital">
-      <div class="phase-dot">🏥</div>
-      <span>Left Hospital</span>
-    </div>
-    <div class="phase-line" id="line1"></div>
-    <div class="phase-step" id="stepPickup">
-      <div class="phase-dot">📍</div>
-      <span>Patient Pickup</span>
-    </div>
-    <div class="phase-line" id="line2"></div>
-    <div class="phase-step" id="stepArrive">
-      <div class="phase-dot">🏥</div>
-      <span>At Hospital</span>
-    </div>
-  </div>
-
-  <!-- ETA banner -->
+  <!-- 2. ETA Banner (Dynamic) -->
   <div class="eta-banner" id="etaBanner" style="display:none;">
-    <div>
+    <div class="eta-left-box">
       <div class="eta-num" id="etaNum">—</div>
-      <div class="eta-label">MINUTES</div>
+      <div class="eta-unit">MINS</div>
     </div>
-    <div>
-      <div class="eta-phase" id="etaPhase">Loading…</div>
-      <div class="eta-label" id="etaDetail"></div>
+    <div class="eta-info">
+      <div class="eta-phase" id="etaPhase">Locating response vehicle…</div>
+      <p class="eta-label" id="etaDetail">Dynamic Haversine distance telemetry updating every 2 seconds.</p>
     </div>
   </div>
 
+  <!-- 3. Balanced Equal-Height Grid (Map + 3 Telemetry Cards) -->
   <div class="row g-3">
-    <!-- Map -->
+    
+    <!-- Left Column: Map Route -->
     <div class="col-lg-8">
-      <div class="content-card">
+      <div class="content-card map-card-wrapper">
         <div class="track-card-header">
-          <div class="track-card-icon"><i class="bi bi-map"></i></div>
+          <div class="track-card-icon"><i class="bi bi-geo-alt-fill"></i></div>
           <div class="flex-grow-1">
-            <h5>Ambulance Route</h5>
-            <p id="routeInfo">Hospital → Your location → Hospital</p>
+            <h5>Live Route & Ambulance Navigation</h5>
+            <p id="routeInfo">Khairpur Network · Dynamic Haversine routing</p>
           </div>
-          <span class="live-badge"><span class="live-dot"></span>LIVE</span>
+          <span class="live-badge"><span class="live-dot"></span>LIVE GPS</span>
         </div>
-        <div class="card-body p-0">
-          <div id="map"><div class="map-loading"><div class="spinner-border text-primary"></div><small>Locating ambulance…</small></div></div>
+        <div class="card-body p-0 flex-grow-1">
+          <div id="map">
+            <div class="map-loading">
+              <div class="spinner-border text-primary"></div>
+              <small class="fw-semibold">Connecting to MedCare GPS Telemetry…</small>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Case details -->
-    <div class="col-lg-4">
-      <div class="content-card mb-3">
+    <!-- Right Column: Case & Healthcare Resource Panels -->
+    <div class="col-lg-4 d-flex flex-column gap-3">
+      
+      <!-- Panel 1: Patient & Incident Triage -->
+      <div class="content-card">
         <div class="track-card-header">
           <div class="track-card-icon"><i class="bi bi-person-vcard"></i></div>
           <div>
-            <h5>Patient &amp; Case</h5>
-            <p>Reference {{ case.case_code }}</p>
+            <h5>Patient Triage Record</h5>
+            <p>Case Reference {{ case.case_code }}</p>
           </div>
         </div>
-        <div class="card-body" style="padding: 10px 20px;">
+        <div class="card-body p-3">
           <div class="detail-row">
-            <div class="detail-ico" style="background:#e8eefb;color:#1F3971;"><i class="bi bi-person"></i></div>
-            <div><span class="dl">Patient</span><span class="dv">{{ case.patient_name }} ({{ case.age }} yrs)</span></div>
+            <div class="detail-ico bg-primary bg-opacity-10 text-primary"><i class="bi bi-person-fill"></i></div>
+            <div>
+              <span class="dl">Patient Profile</span>
+              <span class="dv">{{ case.patient_name }} ({{ case.age }} yrs)</span>
+            </div>
           </div>
+          {% if case.patient_phone %}
           <div class="detail-row">
-            <div class="detail-ico" style="background:#fdecea;color:#e53935;"><i class="bi bi-exclamation-triangle"></i></div>
-            <div><span class="dl">Priority</span><span class="badge badge-{{ case.priority|lower }}">{{ case.priority }}</span></div>
+            <div class="detail-ico bg-info bg-opacity-10 text-info"><i class="bi bi-telephone-fill"></i></div>
+            <div>
+              <span class="dl">Contact Number</span>
+              <span class="dv" style="font-weight: 600;">
+                <a href="tel:{{ case.patient_phone }}" class="text-decoration-none text-dark"><i class="bi bi-phone me-1 text-primary"></i>{{ case.patient_phone }}</a>
+              </span>
+            </div>
           </div>
+          {% endif %}
           <div class="detail-row">
-            <div class="detail-ico" style="background:#fff4dd;color:#b97c00;"><i class="bi bi-activity"></i></div>
-            <div><span class="dl">Condition</span><span class="dv" style="font-weight:400;">{{ case.condition }}</span></div>
+            <div class="detail-ico bg-danger bg-opacity-10 text-danger"><i class="bi bi-activity"></i></div>
+            <div>
+              <span class="dl">Clinical Condition</span>
+              <span class="dv" style="font-size: 0.84rem; font-weight: 500;">{{ case.condition }}</span>
+            </div>
           </div>
           {% if case.patient_address %}
           <div class="detail-row">
-            <div class="detail-ico" style="background:#e8f5e9;color:#2e7d32;"><i class="bi bi-geo-alt"></i></div>
-            <div><span class="dl">Pickup Address</span><span class="dv" style="font-weight:400;">{{ case.patient_address }}</span></div>
+            <div class="detail-ico bg-success bg-opacity-10 text-success"><i class="bi bi-geo-alt-fill"></i></div>
+            <div>
+              <span class="dl">Pickup Address</span>
+              <span class="dv" style="font-size: 0.84rem; font-weight: 500;">{{ case.patient_address }}</span>
+            </div>
           </div>
           {% endif %}
         </div>
       </div>
 
-      <div class="content-card mb-3">
+      <!-- Panel 2: Ambulance Fleet Telemetry -->
+      <div class="content-card">
         <div class="track-card-header">
-          <div class="track-card-icon" style="font-size: 1.45rem; line-height: 1;">🚑</div>
+          <div class="track-card-icon" style="font-size: 1.25rem;">🚑</div>
           <div>
-            <h5>Ambulance</h5>
-            <p>Unit &amp; live status</p>
+            <h5>Assigned Ambulance</h5>
+            <p>10-Unit District Response Fleet</p>
           </div>
         </div>
-        <div class="card-body" style="padding: 10px 20px;">
+        <div class="card-body p-3">
           <div class="detail-row">
-            <div class="detail-ico" style="background:#fdecea; font-size: 1.15rem; line-height: 1;">🚑</div>
-            <div><span class="dl">Unit</span><span class="dv" id="ambUnit">Assigning…</span></div>
+            <div class="detail-ico bg-danger bg-opacity-10 text-danger">🚑</div>
+            <div>
+              <span class="dl">Vehicle Unit</span>
+              <span class="dv" id="ambUnit">Assigning unit…</span>
+            </div>
           </div>
           <div class="detail-row">
-            <div class="detail-ico" style="background:#e8eefb;color:#1F3971;"><i class="bi bi-flag"></i></div>
-            <div><span class="dl">Departed From</span><span class="dv" id="departFrom">—</span></div>
+            <div class="detail-ico bg-primary bg-opacity-10 text-primary"><i class="bi bi-hospital-fill"></i></div>
+            <div>
+              <span class="dl">Departed Base</span>
+              <span class="dv" id="departFrom">—</span>
+            </div>
           </div>
           <div class="detail-row">
-            <div class="detail-ico" style="background:#fff4dd;color:#b97c00;"><i class="bi bi-clock"></i></div>
-            <div><span class="dl">Current Phase</span><span class="dv" id="phaseText">—</span></div>
+            <div class="detail-ico bg-warning bg-opacity-10 text-warning"><i class="bi bi-compass-fill"></i></div>
+            <div>
+              <span class="dl">Transit Status</span>
+              <span class="dv" id="phaseText">—</span>
+            </div>
           </div>
         </div>
       </div>
 
+      <!-- Panel 3: Care Facility & Bed Reservation -->
       <div class="content-card">
         <div class="track-card-header">
           <div class="track-card-icon"><i class="bi bi-hospital"></i></div>
           <div>
-            <h5>Assigned Resources</h5>
-            <p>Reserved for your arrival</p>
+            <h5>Destination Facility</h5>
+            <p>Reserved for your intake</p>
           </div>
         </div>
-        <div class="card-body" style="padding: 10px 20px;">
+        <div class="card-body p-3">
           <div class="detail-row">
-            <div class="detail-ico" style="background:#e8eefb;color:#1F3971;"><i class="bi bi-hospital"></i></div>
-            <div><span class="dl">Hospital</span><span class="dv" id="resHospital">—</span></div>
+            <div class="detail-ico bg-primary bg-opacity-10 text-primary"><i class="bi bi-building"></i></div>
+            <div>
+              <span class="dl">Hospital Complex</span>
+              <span class="dv" id="resHospital">—</span>
+            </div>
           </div>
           <div class="detail-row">
-            <div class="detail-ico" style="background:#fdecea;color:#e53935;"><i class="bi bi-person-badge"></i></div>
-            <div><span class="dl">Doctor</span><span class="dv" id="resDoctor">—</span></div>
+            <div class="detail-ico bg-info bg-opacity-10 text-info"><i class="bi bi-person-badge-fill"></i></div>
+            <div>
+              <span class="dl">Attending Physician</span>
+              <span class="dv" id="resDoctor">—</span>
+            </div>
           </div>
           <div class="detail-row">
-            <div class="detail-ico" style="background:#e8f5e9;color:#2e7d32;"><i class="bi bi-bed"></i></div>
-            <div><span class="dl">Bed Reserved</span><span class="dv" id="resBed">—</span></div>
+            <div class="detail-ico bg-success bg-opacity-10 text-success"><i class="bi bi-door-closed-fill"></i></div>
+            <div>
+              <span class="dl">Bed Reserved</span>
+              <span class="dv" id="resBed">—</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<footer class="site-footer">
-  <div class="container text-center">
-    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03</p>
-    <p class="mb-0 powered-by">Powered by <strong>Musafir Devs</strong></p>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="telemetry-footer">
+  <div class="container-fluid px-4 text-center">
+    <p class="mb-0">&copy; 2026 MedCare Emergency Resource Manager · OpenHack26 · Team HT-03 · Powered by <strong>Musafir Devs</strong></p>
   </div>
 </footer>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  /* ===== Mobile sidebar ===== */
-  const sidebar = document.getElementById('mobileSidebar');
-  const sidebarOverlay = document.getElementById('mobileSidebarOverlay');
-  const hamburger = document.getElementById('mobileHamburger');
-  function openSidebar() {
-    sidebar.classList.add('open'); sidebarOverlay.classList.add('open');
-    hamburger.classList.add('active'); document.body.style.overflow = 'hidden';
-  }
-  function closeSidebar() {
-    sidebar.classList.remove('open'); sidebarOverlay.classList.remove('open');
-    hamburger.classList.remove('active'); document.body.style.overflow = '';
-  }
-  hamburger?.addEventListener('click', e => { e.preventDefault(); sidebar.classList.contains('open') ? closeSidebar() : openSidebar(); });
-  document.getElementById('mobileSidebarClose')?.addEventListener('click', e => { e.preventDefault(); closeSidebar(); });
-  sidebarOverlay?.addEventListener('click', closeSidebar);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
-
-  /* ===== Live tracking ===== */
+  /* ===== Live tracking logic ===== */
   const CASE_URL = "{{ url_for('track_api', case_code=case.case_code) }}";
   let map, ambMarker, patientMarker, hospMarker, line1, line2, initialized = false;
 
@@ -379,18 +804,21 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18, attribution: '&copy; OpenStreetMap'
     }).addTo(map);
+
     hospMarker = L.marker([hospital.lat, hospital.lng], {
-      icon: L.divIcon({className: '', html: '🏥', iconSize: [34, 34]})
-    }).addTo(map).bindPopup('<div class="amb-popup"><strong>' + hospital.name + '</strong></div>');
+      icon: L.divIcon({className: '', html: '<div style="font-size:26px;">🏥</div>', iconSize: [34, 34]})
+    }).addTo(map).bindPopup('<strong>' + hospital.name + '</strong>');
+
     patientMarker = L.marker([patient.lat, patient.lng], {
-      icon: L.divIcon({className: '', html: '📍', iconSize: [30, 30]})
-    }).addTo(map).bindPopup('<div class="amb-popup"><strong>Your pickup location</strong><br>' + (patient.address || '') + '</div>');
+      icon: L.divIcon({className: '', html: '<div style="font-size:26px;">📍</div>', iconSize: [30, 30]})
+    }).addTo(map).bindPopup('<strong>Pickup Location</strong><br>' + (patient.address || ''));
+
     ambMarker = L.marker([start.lat, start.lng], {
-      icon: L.divIcon({className: '', html: '🚑', iconSize: [32, 32]})
-    }).addTo(map).bindPopup('<div class="amb-popup">Ambulance en route</div>');
-    // hospital -> patient (yellow), patient -> hospital (blue)
+      icon: L.divIcon({className: '', html: '<div style="font-size:28px;">🚑</div>', iconSize: [32, 32]})
+    }).addTo(map).bindPopup('<strong>Ambulance En Route</strong>');
+
     line1 = L.polyline([[start.lat, start.lng], [patient.lat, patient.lng]], {color: '#FFAE27', weight: 4, dashArray: '8 6'}).addTo(map);
-    line2 = L.polyline([[patient.lat, patient.lng], [hospital.lat, hospital.lng]], {color: '#1e88e5', weight: 4, dashArray: '8 6'}).addTo(map);
+    line2 = L.polyline([[patient.lat, patient.lng], [hospital.lat, hospital.lng]], {color: '#1F3971', weight: 4, dashArray: '8 6'}).addTo(map);
     map.fitBounds([[start.lat, start.lng], [hospital.lat, hospital.lng]], {padding: [50, 50]});
     initialized = true;
   }
@@ -401,23 +829,35 @@
           sA = document.getElementById('stepArrive'),
           l1 = document.getElementById('line1'),
           l2 = document.getElementById('line2');
+
+    if (!sH || !sP || !sA) return;
+
     [sH, sP, sA].forEach(s => s.classList.remove('active', 'done'));
-    [l1, l2].forEach(l => l.classList.remove('done', 'active-flow'));
+    [l1, l2].forEach(l => l?.classList.remove('done', 'active-flow'));
+
     if (phase === 'to_patient') {
-      sH.classList.add('active'); l1.classList.add('active-flow');
+      sH.classList.add('done');
+      sP.classList.add('active');
+      l1?.classList.add('active-flow');
     } else if (phase === 'to_hospital') {
-      sH.classList.add('done'); sP.classList.add('done');
-      l1.classList.add('done'); l2.classList.add('active-flow');
+      sH.classList.add('done');
+      sP.classList.add('done');
+      sA.classList.add('active');
+      l1?.classList.add('done');
+      l2?.classList.add('active-flow');
     } else if (phase === 'arrived') {
-      sH.classList.add('done'); sP.classList.add('done'); sA.classList.add('done');
-      l1.classList.add('done'); l2.classList.add('done');
+      sH.classList.add('done');
+      sP.classList.add('done');
+      sA.classList.add('done');
+      l1?.classList.add('done');
+      l2?.classList.add('done');
     }
   }
 
   const phaseTexts = {
     to_patient: '🚑 Coming to your location',
     to_hospital: '🚑 Patient onboard — heading to hospital',
-    arrived: '✅ Arrived at hospital'
+    arrived: '✅ Arrived at destination hospital'
   };
 
   async function poll() {
@@ -426,52 +866,66 @@
       const d = await res.json();
       const c = d.case || {};
 
-      // resources
-      document.getElementById('resHospital').textContent = c.hospital || '—';
-      document.getElementById('resDoctor').textContent = c.doctor || '—';
-      document.getElementById('resBed').textContent = c.bed || '—';
+      // Resources
+      const rHosp = document.getElementById('resHospital');
+      const rDoc = document.getElementById('resDoctor');
+      const rBed = document.getElementById('resBed');
+      if (rHosp) rHosp.textContent = c.hospital || '—';
+      if (rDoc) rDoc.textContent = c.doctor || '—';
+      if (rBed) rBed.textContent = c.bed || '—';
 
       if (!d.dispatched || !d.position) {
-        document.getElementById('phaseText').textContent = 'Not dispatched yet';
-        document.getElementById('etaBanner').style.display = 'none';
-        if (c.patient_lat) initMap(
-          {lat: c.patient_lat, lng: c.patient_lng},
-          {lat: c.patient_lat, lng: c.patient_lng, address: c.patient_address || ''},
-          {lat: c.patient_lat, lng: c.patient_lng, name: c.hospital || 'Hospital'});
+        const phT = document.getElementById('phaseText');
+        if (phT) phT.textContent = 'Not dispatched yet';
+        const eb = document.getElementById('etaBanner');
+        if (eb) eb.style.display = 'none';
+        if (c.patient_lat) {
+          initMap(
+            {lat: c.patient_lat, lng: c.patient_lng},
+            {lat: c.patient_lat, lng: c.patient_lng, address: c.patient_address || ''},
+            {lat: c.patient_lat, lng: c.patient_lng, name: c.hospital || 'Hospital'}
+          );
+        }
         return;
       }
 
       initMap(d.start, d.patient, d.hospital);
-      ambMarker.setLatLng([d.position.lat, d.position.lng]);
+      if (ambMarker && d.position) {
+        ambMarker.setLatLng([d.position.lat, d.position.lng]);
+      }
 
-      // ambulance card
-      document.getElementById('ambUnit').textContent = c.ambulance || '—';
-      document.getElementById('departFrom').textContent = (d.start && d.start.name) ? d.start.name : (c.hospital || '—');
-      document.getElementById('phaseText').textContent = phaseTexts[d.phase] || d.phase;
+      // Ambulance panel
+      const aUnit = document.getElementById('ambUnit');
+      const dFrom = document.getElementById('departFrom');
+      const phText = document.getElementById('phaseText');
+      if (aUnit) aUnit.textContent = c.ambulance || '—';
+      if (dFrom) dFrom.textContent = (d.start && d.start.name) ? d.start.name : (c.hospital || '—');
+      if (phText) phText.textContent = phaseTexts[d.phase] || d.phase;
 
-      // stepper
+      // Update route info
+      const rInfo = document.getElementById('routeInfo');
+      if (rInfo && d.hospital) {
+        rInfo.textContent = (d.start?.name || 'Base') + ' → Patient → ' + d.hospital.name;
+      }
+
+      // Update Stepper
       setStepper(d.phase);
 
-      // ETA banner
+      // Update ETA banner
       const banner = document.getElementById('etaBanner');
-      banner.style.display = 'flex';
-      document.getElementById('etaNum').textContent = d.eta_min;
-      document.getElementById('etaPhase').textContent = phaseTexts[d.phase] || d.phase;
-      document.getElementById('etaDetail').textContent =
-        d.phase === 'to_patient'
-          ? ('Reaching you in ~' + (d.eta_to_patient_min || d.eta_min) + ' min')
-          : (d.phase === 'to_hospital' ? 'Arriving at hospital shortly' : 'Handover to medical team');
+      if (banner) {
+        banner.style.display = 'flex';
+        const etaNum = document.getElementById('etaNum');
+        const etaPhase = document.getElementById('etaPhase');
+        if (etaNum) etaNum.textContent = d.eta_min ?? '—';
+        if (etaPhase) etaPhase.textContent = phaseTexts[d.phase] || d.phase;
+      }
 
-      // subtitle
-      document.getElementById('trackSubtitle').textContent =
-        'Case ' + c.code + ' · Status: ' + c.status +
-        (d.phase !== 'arrived' ? ' · ETA ' + d.eta_min + ' min' : ' · Completed');
-      document.getElementById('routeInfo').textContent =
-        (d.start.name || 'Hospital') + ' → Your location → ' + d.hospital.name;
     } catch (e) {
-      console.error(e);
+      console.warn('Telemetry poll error:', e);
     }
   }
+
   poll();
   setInterval(poll, 2000);
 </script>

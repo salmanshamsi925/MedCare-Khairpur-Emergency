@@ -1,9 +1,11 @@
 import os
 import math
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory, send_file
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from pdf_generator import generate_cases_pdf, generate_single_case_pdf, generate_doctor_patients_pdf, generate_resources_pdf
+
 
 app = Flask(__name__)
 app.secret_key = 'medcare-emergency-ht03-secret-key-2026'
@@ -50,6 +52,7 @@ class Case(db.Model):
     patient_lat = db.Column(db.Float, nullable=True)
     patient_lng = db.Column(db.Float, nullable=True)
     patient_address = db.Column(db.String(255), nullable=True)
+    patient_phone = db.Column(db.String(30), nullable=True)
     assigned_doctor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     assigned_bed_id = db.Column(db.Integer, db.ForeignKey('bed.id'), nullable=True)
     assigned_ambulance_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
@@ -361,6 +364,8 @@ def create_request():
     code = f'C{(last.id + 1) if last else 1:03d}'
     needs_amb = str(data.get('needs_ambulance', 'yes')).lower() in ('yes', 'true', '1')
 
+    patient_phone = (data.get('patient_phone') or data.get('phone') or '').strip() or None
+
     c = Case(
         case_code=code,
         patient_name=data['patient_name'].strip(),
@@ -369,6 +374,7 @@ def create_request():
         condition=data['condition'],
         status='Incoming',
         patient_address=data.get('address'),
+        patient_phone=patient_phone,
         patient_lat=lat, patient_lng=lng,
         hospital_name=data.get('hospital_name'),
         needs_ambulance=needs_amb,
@@ -379,7 +385,9 @@ def create_request():
     db.session.commit()
     return jsonify({'case_code': code, 'allocation': summary,
                     'ambulance_found': bool(summary['ambulance']),
-                    'track_url': url_for('track', case_code=code)})
+                    'track_url': url_for('track', case_code=code),
+                    'pdf_url': url_for('export_case_slip_pdf', case_code=code)})
+
 
 # ---------- LIVE TRACKING (public, per case) ----------
 
@@ -388,6 +396,26 @@ def track(case_code):
     c = Case.query.filter_by(case_code=case_code).first_or_404()
     return render_template('track.html', case=c)
 
+@app.route('/case/<case_code>/pdf')
+def export_case_slip_pdf(case_code):
+    c = Case.query.filter_by(case_code=case_code).first_or_404()
+    logo_path = os.path.join(app.root_path, 'static', 'img', 'logo101.png')
+    track_url = url_for('track', case_code=c.case_code, _external=True)
+    pdf_buf = generate_single_case_pdf(
+        case=c,
+        logo_path=logo_path,
+        track_url=track_url
+    )
+    filename = f"MedCare_Emergency_Slip_{c.case_code}.pdf"
+    as_attachment = request.args.get('view') != '1'
+    return send_file(
+        pdf_buf,
+        mimetype='application/pdf',
+        as_attachment=as_attachment,
+        download_name=filename
+    )
+
+
 @app.route('/api/track/<case_code>')
 def track_api(case_code):
     c = Case.query.filter_by(case_code=case_code).first_or_404()
@@ -395,6 +423,8 @@ def track_api(case_code):
     amb = c.ambulance
     result = {'dispatched': False, 'case': {
         'code': c.case_code, 'status': c.status, 'priority': c.priority,
+        'patient_name': c.patient_name,
+        'patient_phone': c.patient_phone,
         'patient_lat': c.patient_lat, 'patient_lng': c.patient_lng,
         'hospital': c.hospital_name,
         'doctor': c.doctor.name if c.doctor else None,
@@ -462,6 +492,79 @@ def ambulances_live():
                                'on_the_way': sum(1 for a in out if a['status'] == 'On the way'),
                                'occupied': sum(1 for a in out if a['status'] == 'Occupied')}})
 
+@app.route('/api/admin/notifications')
+def admin_notifications():
+    """Live notification events for admin & doctors (e.g. Ambulance arrived at hospital)."""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized', 'notifications': [], 'total_count': 0}), 401
+
+    # Fetch recent cases with ambulance assignments
+    cases = Case.query.filter(
+        Case.assigned_ambulance_id.isnot(None),
+        Case.dispatched_at.isnot(None)
+    ).order_by(Case.id.desc()).limit(20).all()
+
+    notifications = []
+    for c in cases:
+        st = dispatch_state(c)
+        amb_unit = c.ambulance.vehicle_id or c.ambulance.name if c.ambulance else 'Ambulance'
+        hosp = c.hospital_name or (st.get('hospital', {}).get('name') if st else 'Hospital')
+
+        if st and st.get('phase') == 'arrived':
+            notifications.append({
+                'id': f'arrival_{c.id}',
+                'case_id': c.id,
+                'case_code': c.case_code,
+                'type': 'arrival',
+                'severity': 'success',
+                'ambulance_unit': amb_unit,
+                'patient_name': c.patient_name,
+                'priority': c.priority,
+                'hospital_name': hosp,
+                'title': f'{amb_unit} Arrived at Hospital',
+                'message': f'{amb_unit} has arrived at {hosp} with patient {c.patient_name} ({c.priority}).',
+                'status_text': 'Arrived at Hospital — Handover in Progress',
+                'time_str': c.dispatched_at.strftime('%I:%M %p') if c.dispatched_at else 'Just now'
+            })
+        elif st and st.get('phase') == 'to_hospital':
+            notifications.append({
+                'id': f'transit_{c.id}',
+                'case_id': c.id,
+                'case_code': c.case_code,
+                'type': 'en_route_hospital',
+                'severity': 'info',
+                'ambulance_unit': amb_unit,
+                'patient_name': c.patient_name,
+                'priority': c.priority,
+                'hospital_name': hosp,
+                'title': f'{amb_unit} En Route to Hospital',
+                'message': f'{amb_unit} is transporting {c.patient_name} to {hosp} (ETA: {st.get("eta_min", 0)} min).',
+                'status_text': f'ETA: {st.get("eta_min", 0)} min to {hosp}',
+                'time_str': c.dispatched_at.strftime('%I:%M %p') if c.dispatched_at else 'Just now'
+            })
+        elif st and st.get('phase') == 'to_patient':
+            notifications.append({
+                'id': f'dispatch_{c.id}',
+                'case_id': c.id,
+                'case_code': c.case_code,
+                'type': 'dispatched',
+                'severity': 'warning',
+                'ambulance_unit': amb_unit,
+                'patient_name': c.patient_name,
+                'priority': c.priority,
+                'hospital_name': hosp,
+                'title': f'{amb_unit} Dispatched to Patient',
+                'message': f'{amb_unit} dispatched to {c.patient_name} at {c.patient_address or "location"} (ETA: {st.get("eta_to_patient_min", st.get("eta_min", 0))} min).',
+                'status_text': f'Heading to Patient · ETA: {st.get("eta_to_patient_min", st.get("eta_min", 0))} min',
+                'time_str': c.dispatched_at.strftime('%I:%M %p') if c.dispatched_at else 'Just now'
+            })
+
+    return jsonify({
+        'notifications': notifications,
+        'arrivals_count': sum(1 for n in notifications if n['type'] == 'arrival'),
+        'total_count': len(notifications)
+    })
+
 # ---------- ADMIN / STAFF MODULE ----------
 
 @app.route('/admin')
@@ -486,10 +589,12 @@ def admin_cases():
         if action == 'add':
             last = Case.query.order_by(Case.id.desc()).first()
             code = f'C{(last.id + 1) if last else 1:03d}'
+            patient_phone = (request.form.get('phone') or request.form.get('patient_phone') or '').strip() or None
             new_case = Case(case_code=code, patient_name=request.form['patient_name'],
                 age=int(request.form['age']), priority=request.form['priority'],
                 condition=request.form['condition'], status=request.form.get('status', 'Active'),
                 patient_address=request.form.get('address'),
+                patient_phone=patient_phone,
                 patient_lat=float(request.form['lat']) if request.form.get('lat') else None,
                 patient_lng=float(request.form['lng']) if request.form.get('lng') else None)
             db.session.add(new_case)
@@ -532,12 +637,61 @@ def admin_cases():
         q = q.filter_by(priority=priority_filter)
     return render_template('admin/cases.html', cases=q.all(), priority_filter=priority_filter)
 
+@app.route('/admin/cases/export-pdf')
+@login_required(role='admin')
+def export_cases_pdf():
+    priority_filter = request.args.get('priority', 'all')
+    q = Case.query.order_by(Case.registered_at.desc())
+    if priority_filter != 'all':
+        q = q.filter_by(priority=priority_filter)
+    cases = q.all()
+    logo_path = os.path.join(app.root_path, 'static', 'img', 'logo101.png')
+    pdf_buf = generate_cases_pdf(
+        cases=cases,
+        priority_filter=priority_filter,
+        logo_path=logo_path,
+        generated_by=session.get('name', 'Admin Desk')
+    )
+    timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M')
+    filename = f"MedCare_Cases_{priority_filter}_{timestamp}.pdf"
+    as_attachment = request.args.get('view') != '1'
+    return send_file(
+        pdf_buf,
+        mimetype='application/pdf',
+        as_attachment=as_attachment,
+        download_name=filename
+    )
+
 @app.route('/admin/resources')
 @login_required(role='admin')
 def admin_resources():
     return render_template('admin/resources.html', beds=Bed.query.all(),
         doctors=User.query.filter_by(role='doctor').all(),
         ambulances=User.query.filter_by(role='ambulance').all())
+
+@app.route('/admin/resources/export-pdf')
+@login_required(role='admin')
+def export_resources_pdf():
+    beds = Bed.query.all()
+    doctors = User.query.filter_by(role='doctor').all()
+    ambulances = User.query.filter_by(role='ambulance').all()
+    logo_path = os.path.join(app.root_path, 'static', 'img', 'logo101.png')
+    pdf_buf = generate_resources_pdf(
+        beds=beds,
+        doctors=doctors,
+        ambulances=ambulances,
+        logo_path=logo_path
+    )
+    timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M')
+    filename = f"MedCare_Resources_Audit_{timestamp}.pdf"
+    as_attachment = request.args.get('view') != '1'
+    return send_file(
+        pdf_buf,
+        mimetype='application/pdf',
+        as_attachment=as_attachment,
+        download_name=filename
+    )
+
 
 @app.route('/admin/resource/update', methods=['POST'])
 @login_required(role='admin')
@@ -724,6 +878,28 @@ def doctor_patients():
     my_cases = Case.query.filter_by(assigned_doctor_id=user.id).order_by(Case.registered_at.desc()).all()
     return render_template('doctor/patients.html', user=user, my_cases=my_cases)
 
+@app.route('/doctor/patients/export-pdf')
+@login_required(role='doctor')
+def export_doctor_patients_pdf():
+    user = User.query.get(session['user_id'])
+    my_cases = Case.query.filter_by(assigned_doctor_id=user.id).order_by(Case.registered_at.desc()).all()
+    logo_path = os.path.join(app.root_path, 'static', 'img', 'logo101.png')
+    pdf_buf = generate_doctor_patients_pdf(
+        doctor_user=user,
+        cases=my_cases,
+        logo_path=logo_path
+    )
+    timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M')
+    filename = f"MedCare_Doctor_{user.username}_Patients_{timestamp}.pdf"
+    as_attachment = request.args.get('view') != '1'
+    return send_file(
+        pdf_buf,
+        mimetype='application/pdf',
+        as_attachment=as_attachment,
+        download_name=filename
+    )
+
+
 @app.route('/doctor/update-status', methods=['POST'])
 @login_required(role='doctor')
 def doctor_update_status():
@@ -779,10 +955,12 @@ def request_help():
     if request.method == 'POST':
         last = Case.query.order_by(Case.id.desc()).first()
         code = f'C{(last.id + 1) if last else 1:03d}'
+        patient_phone = (request.form.get('phone') or request.form.get('patient_phone') or '').strip() or None
         new_case = Case(case_code=code, patient_name=request.form['patient_name'],
             age=int(request.form['age']), priority=request.form.get('priority', 'High'),
             condition=request.form['condition'], status='Incoming',
             patient_address=request.form.get('address'),
+            patient_phone=patient_phone,
             patient_lat=float(request.form['lat']) if request.form.get('lat') else 27.5300,
             patient_lng=float(request.form['lng']) if request.form.get('lng') else 68.7600)
         db.session.add(new_case)

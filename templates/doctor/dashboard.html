@@ -490,12 +490,15 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-12 d-none d-lg-block text-end">
-        <div style="font-size: 4rem; opacity: 0.22; line-height: 1;">🩺</div>
+      <div class="col-lg-4 col-md-12 text-lg-end mt-3 mt-lg-0">
+        <a href="{{ url_for('export_doctor_patients_pdf') }}" class="btn btn-warning rounded-pill px-3 py-2 fw-bold text-dark d-inline-flex align-items-center gap-2 shadow-sm" target="_blank" title="Download Doctor Patient Roster PDF">
+          <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Export Roster (PDF)
+        </a>
       </div>
     </div>
   </div>
 </div>
+
 
 <!-- ================= DASHBOARD CONTENT ================= -->
 <div class="container section-padding" style="padding-top: 32px; padding-bottom: 50px;">
@@ -609,11 +612,18 @@
               <p>Auto-assigned by the smart allocation engine</p>
             </div>
           </div>
-          <a href="{{ url_for('doctor_patients') }}" class="btn btn-sm" style="background:var(--yellow);color:var(--navy);font-weight:700;border-radius:20px;padding:5px 16px;">
-            <span>View All</span>
-            <i class="bi bi-arrow-right ms-1"></i>
-          </a>
+          <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('export_doctor_patients_pdf') }}" class="btn btn-sm btn-outline-light rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1" target="_blank" title="Export Patient Roster as PDF">
+              <i class="bi bi-file-earmark-pdf-fill text-warning"></i>
+              <span>PDF Roster</span>
+            </a>
+            <a href="{{ url_for('doctor_patients') }}" class="btn btn-sm" style="background:var(--yellow);color:var(--navy);font-weight:700;border-radius:20px;padding:5px 16px;">
+              <span>View All</span>
+              <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
         </div>
+
 
         <div class="card-body p-0">
           <div class="table-responsive">
@@ -682,15 +692,26 @@
                     </span>
                   </td>
                   <td class="text-end">
-                    <!-- HCI: Safe Discharge Action with confirmation -->
-                    <form method="POST" action="{{ url_for('doctor_discharge_patient') }}" class="d-inline" onsubmit="return confirm('Discharge patient {{ c.patient_name }} ({{ c.case_code }})? The bed will be released for other patients.')">
-                      <input type="hidden" name="case_id" value="{{ c.id }}">
-                      <button type="submit" class="btn-discharge-action" title="Mark patient treated & discharge">
-                        <i class="bi bi-check2-circle"></i>
-                        <span>Discharge</span>
-                      </button>
-                    </form>
+                    <div class="d-inline-flex align-items-center gap-1 justify-content-end">
+                      <a href="{{ url_for('export_case_slip_pdf', case_code=c.case_code) }}" class="btn btn-outline-danger btn-sm py-1 px-2 rounded-2 fw-semibold d-inline-flex align-items-center gap-1" style="font-size: 0.75rem;" title="Download Patient Slip (PDF)">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> Slip
+                      </a>
+                      <!-- HCI: Safe Discharge Action with confirmation -->
+                      <form method="POST" action="{{ url_for('doctor_discharge_patient') }}" class="d-inline m-0"
+                            data-confirm="Discharge patient <strong>{{ c.patient_name }}</strong> (Case: {{ c.case_code }})? The assigned hospital bed will be released for other incoming emergency patients."
+                            data-confirm-title="Discharge Patient"
+                            data-confirm-badge="PATIENT: {{ c.patient_name }} ({{ c.case_code }})"
+                            data-confirm-btn="Yes, Discharge"
+                            data-confirm-type="close">
+                        <input type="hidden" name="case_id" value="{{ c.id }}">
+                        <button type="submit" class="btn-discharge-action" title="Mark patient treated & discharge">
+                          <i class="bi bi-check2-circle"></i>
+                          <span>Discharge</span>
+                        </button>
+                      </form>
+                    </div>
                   </td>
+
                 </tr>
                 {% else %}
                 <tr>

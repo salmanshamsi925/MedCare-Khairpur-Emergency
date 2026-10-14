@@ -360,6 +360,29 @@
     transform: translateY(-1px);
   }
 
+  /* PDF Action Buttons */
+  .btn-action-pdf {
+    background: #fef2f2;
+    border: 1.5px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 8px;
+    padding: 5px 9px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.18s ease;
+  }
+  .btn-action-pdf:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+    transform: translateY(-1px);
+  }
+
   /* Doctor Assigned Info */
   .doctor-cell {
     display: flex;
@@ -441,6 +464,61 @@
   }
   .btn-allocate:hover { background: #f8fafc; color: #1F3971; transform: translateY(-1px); }
 
+  .btn-pdf {
+    background: linear-gradient(135deg, #102146 0%, #1F3971 100%);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 174, 39, 0.45);
+    box-shadow: 0 4px 14px rgba(16, 33, 70, 0.22);
+  }
+  .btn-pdf:hover {
+    background: linear-gradient(135deg, #1F3971 0%, #294c96 100%);
+    color: #FFAE27;
+    border-color: #FFAE27;
+    transform: translateY(-1px);
+  }
+  .btn-pdf i { color: #FFAE27; }
+
+  .btn-pdf-subtle {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    border-radius: 20px 0 0 20px;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+  }
+  .btn-pdf-subtle:hover {
+    background: #ffffff;
+    color: #102146;
+    border-color: #ffffff;
+  }
+  .btn-pdf-subtle:hover i { color: #dc2626 !important; }
+
+  .btn-pdf-subtle-view {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-left: none;
+    color: #ffffff;
+    border-radius: 0 20px 20px 0;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+  }
+  .btn-pdf-subtle-view:hover {
+    background: #ffffff;
+    color: #1F3971;
+    border-color: #ffffff;
+  }
+
+
   .dashboard-main-content {
     padding: 20px 24px 36px;
     flex: 1;
@@ -506,6 +584,10 @@
     </p>
   </div>
   <div class="topbar-right">
+    <a href="{{ url_for('export_cases_pdf', priority=priority_filter) }}" class="btn-topbar-action btn-pdf" target="_blank" title="Export Official PDF Report of Cases">
+      <i class="bi bi-file-earmark-pdf-fill"></i>
+      <span>Export PDF Report</span>
+    </a>
     <a href="{{ url_for('admin_allocate') }}" class="btn-topbar-action btn-allocate">
       <i class="bi bi-magic text-warning"></i>
       <span>Smart Allocate</span>
@@ -516,6 +598,7 @@
     </a>
   </div>
 </header>
+
 
 <!-- ================= CONTENT ================= -->
 <main class="dashboard-main-content">
@@ -555,10 +638,14 @@
             <input type="text" name="patient_name" class="form-control" placeholder="Enter patient full name" required>
           </div>
           <div class="col-lg-2 col-md-3 col-6">
+            <label class="form-label"><i class="bi bi-telephone me-1 text-primary"></i> Phone</label>
+            <input type="text" name="phone" class="form-control" placeholder="0300-1234567">
+          </div>
+          <div class="col-lg-1 col-md-3 col-6">
             <label class="form-label"><i class="bi bi-calendar3 me-1 text-primary"></i> Age</label>
             <input type="number" name="age" class="form-control" min="0" max="120" placeholder="e.g. 45" required>
           </div>
-          <div class="col-lg-2 col-md-3 col-6">
+          <div class="col-lg-2 col-md-6 col-6">
             <label class="form-label"><i class="bi bi-shield-exclamation me-1 text-danger"></i> Priority</label>
             <select name="priority" class="form-select fw-semibold" required>
               <option value="Critical">🔴 Critical (Immediate)</option>
@@ -567,7 +654,7 @@
               <option value="Low">🟢 Low (Standard)</option>
             </select>
           </div>
-          <div class="col-lg-5 col-md-12">
+          <div class="col-lg-4 col-md-6 col-12">
             <label class="form-label"><i class="bi bi-heart-pulse me-1 text-danger"></i> Condition / Urgency</label>
             <input type="text" name="condition" class="form-control" placeholder="Describe symptoms or clinical urgency (e.g. Severe chest pain, trauma...)" required>
           </div>
@@ -608,8 +695,19 @@
         </div>
       </div>
       
-      <div class="d-flex align-items-center gap-2">
-        <label class="text-white-50 small mb-0 d-none d-md-inline">Filter Priority:</label>
+      <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+        <!-- PDF List Action Group -->
+        <div class="d-inline-flex align-items-center">
+          <a href="{{ url_for('export_cases_pdf', priority=priority_filter) }}" class="btn-pdf-subtle" title="Download List as PDF">
+            <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
+            <span>PDF List</span>
+          </a>
+          <a href="{{ url_for('export_cases_pdf', priority=priority_filter, view='1') }}" target="_blank" class="btn-pdf-subtle-view" title="Preview PDF in New Tab">
+            <i class="bi bi-box-arrow-up-right"></i>
+          </a>
+        </div>
+
+        <label class="text-white-50 small mb-0 d-none d-md-inline ms-1">Filter Priority:</label>
         <form class="d-inline">
           <select name="priority" class="filter-select" onchange="this.form.submit()">
             <option value="all" {% if priority_filter=='all' %}selected{% endif %}>All Priorities</option>
@@ -646,7 +744,7 @@
                   <span class="patient-avatar">{{ c.patient_name[:2].upper() }}</span>
                   <div>
                     <div class="patient-name">{{ c.patient_name }}</div>
-                    <div class="small text-muted">{{ c.age }} yrs</div>
+                    <div class="small text-muted">{{ c.age }} yrs{% if c.patient_phone %} · <i class="bi bi-telephone text-primary"></i> {{ c.patient_phone }}{% endif %}</div>
                   </div>
                 </div>
               </td>
@@ -694,14 +792,25 @@
               </td>
               <td class="text-end">
                 <div class="d-inline-flex align-items-center gap-1 justify-content-end">
+                  <!-- 0. PDF Slip Button -->
+                  <a href="{{ url_for('export_case_slip_pdf', case_code=c.case_code) }}" class="btn-action-pdf" title="Download Official Patient Emergency Slip (PDF)">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Slip
+                  </a>
+
                   <!-- 1. View Button -->
                   <button type="button" class="btn-action-view" data-bs-toggle="modal" data-bs-target="#caseModal{{ c.id }}" title="View Complete Details">
                     <i class="bi bi-eye"></i> View
                   </button>
 
+
                   <!-- 2. Close Button (if active) -->
                   {% if c.status != 'Closed' %}
-                  <form method="POST" class="d-inline" onsubmit="return confirm('Close case {{ c.case_code }}? Bed, doctor and ambulance will be freed.')">
+                  <form method="POST" class="d-inline"
+                        data-confirm="Close case <strong>{{ c.case_code }}</strong>? The assigned hospital bed, doctor, and ambulance will be freed."
+                        data-confirm-title="Close Emergency Case"
+                        data-confirm-badge="CASE: {{ c.case_code }} · {{ c.patient_name }}"
+                        data-confirm-btn="Yes, Close Case"
+                        data-confirm-type="close">
                     <input type="hidden" name="action" value="close">
                     <input type="hidden" name="case_id" value="{{ c.id }}">
                     <button type="submit" class="btn-action-close" title="Close Case">
@@ -711,7 +820,12 @@
                   {% endif %}
 
                   <!-- 3. Delete Button -->
-                  <form method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to permanently delete case {{ c.case_code }}? Resources will be freed.')">
+                  <form method="POST" class="d-inline"
+                        data-confirm="Are you sure you want to permanently delete case <strong>{{ c.case_code }}</strong>? All allocated emergency resources will be freed."
+                        data-confirm-title="Delete Case Record"
+                        data-confirm-badge="CASE: {{ c.case_code }} · {{ c.patient_name }}"
+                        data-confirm-btn="Yes, Delete Case"
+                        data-confirm-type="danger">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="case_id" value="{{ c.id }}">
                     <button type="submit" class="btn-action-delete" title="Permanently Delete Case">
@@ -848,7 +962,12 @@
 
                   <!-- Modal Footer (Compact) -->
                   <div class="modal-footer bg-white border-top py-2 px-3 d-flex justify-content-between">
-                    <form method="POST" class="m-0" onsubmit="return confirm('Permanently delete case {{ c.case_code }}? This cannot be undone.')">
+                    <form method="POST" class="m-0"
+                          data-confirm="Are you sure you want to permanently delete case <strong>{{ c.case_code }}</strong>? This action cannot be undone."
+                          data-confirm-title="Delete Case Record"
+                          data-confirm-badge="CASE: {{ c.case_code }} · {{ c.patient_name }}"
+                          data-confirm-btn="Yes, Delete Case"
+                          data-confirm-type="danger">
                       <input type="hidden" name="action" value="delete">
                       <input type="hidden" name="case_id" value="{{ c.id }}">
                       <button type="submit" class="btn btn-outline-danger btn-sm py-1 px-2 fw-semibold" style="font-size: 0.75rem;">
@@ -856,9 +975,21 @@
                       </button>
                     </form>
 
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 align-items-center">
+                      <!-- PDF Case Slip -->
+                      <a href="{{ url_for('export_case_slip_pdf', case_code=c.case_code) }}" class="btn btn-outline-danger btn-sm py-1 px-2 fw-semibold d-inline-flex align-items-center gap-1" style="font-size: 0.75rem;" title="Download Official PDF Slip">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> PDF Slip
+                      </a>
+                      <a href="{{ url_for('export_case_slip_pdf', case_code=c.case_code, view='1') }}" target="_blank" class="btn btn-light border btn-sm py-1 px-2" style="font-size: 0.75rem;" title="Open PDF in new tab">
+                        <i class="bi bi-box-arrow-up-right text-primary"></i>
+                      </a>
                       {% if c.status != 'Closed' %}
-                      <form method="POST" class="m-0" onsubmit="return confirm('Close case {{ c.case_code }} and free resources?')">
+                      <form method="POST" class="m-0"
+                            data-confirm="Close case <strong>{{ c.case_code }}</strong> and free all assigned emergency resources?"
+                            data-confirm-title="Close Emergency Case"
+                            data-confirm-badge="CASE: {{ c.case_code }} · {{ c.patient_name }}"
+                            data-confirm-btn="Yes, Close Case"
+                            data-confirm-type="close">
                         <input type="hidden" name="action" value="close">
                         <input type="hidden" name="case_id" value="{{ c.id }}">
                         <button type="submit" class="btn btn-success btn-sm py-1 px-3 fw-semibold" style="font-size: 0.75rem;">

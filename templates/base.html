@@ -15,7 +15,161 @@
 </head>
 <body>
   {% block body %}{% endblock %}
+  <!-- ================= SMART IN-PAGE CONFIRMATION MODAL ================= -->
+  <div class="modal fade" id="smartConfirmModal" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; background: #ffffff;">
+        
+        <!-- Color Accent Top Bar -->
+        <div id="smartConfirmBar" style="height: 6px; background: linear-gradient(90deg, #DC2626, #EF4444);"></div>
+
+        <div class="modal-body p-4 text-center">
+          <!-- Floating Icon Badge -->
+          <div id="smartConfirmIconWrap" class="d-inline-flex align-items-center justify-content-center mb-3" 
+               style="width: 68px; height: 68px; border-radius: 50%; background: #FEE2E2; color: #DC2626; font-size: 1.9rem; box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.25); transition: all 0.2s ease;">
+            <i id="smartConfirmIcon" class="bi bi-trash3-fill"></i>
+          </div>
+
+          <h4 id="smartConfirmTitle" class="fw-bold mb-2" style="color: #102146; font-size: 1.25rem; letter-spacing: -0.2px;">
+            Confirm Action
+          </h4>
+
+          <div id="smartConfirmBadge" class="d-inline-block px-3 py-1 mb-3 rounded-pill fw-bold font-monospace" 
+               style="background: #F1F5F9; color: #1E293B; font-size: 0.82rem; border: 1px solid #E2E8F0;">
+            CASE: C003
+          </div>
+
+          <p id="smartConfirmMessage" class="text-secondary mb-4" style="font-size: 0.92rem; line-height: 1.55; margin: 0 auto; max-width: 360px;">
+            Are you sure you want to proceed?
+          </p>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2 justify-content-center">
+            <button type="button" class="btn btn-light px-4 py-2 fw-semibold" data-bs-dismiss="modal" 
+                    style="border-radius: 12px; font-size: 0.9rem; color: #64748B; border: 1px solid #E2E8F0; min-width: 120px;">
+              Cancel
+            </button>
+            <button type="button" id="smartConfirmSubmitBtn" class="btn btn-danger px-4 py-2 fw-semibold shadow-sm d-inline-flex align-items-center justify-content-center gap-2" 
+                    style="border-radius: 12px; font-size: 0.9rem; min-width: 140px; background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%); border: none;">
+              <i id="smartConfirmBtnIcon" class="bi bi-trash3-fill"></i>
+              <span id="smartConfirmBtnText">Yes, Delete</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let pendingConfirmForm = null;
+
+    function openSmartConfirm(opts) {
+      pendingConfirmForm = opts.form;
+
+      const modalEl = document.getElementById('smartConfirmModal');
+      const titleEl = document.getElementById('smartConfirmTitle');
+      const msgEl = document.getElementById('smartConfirmMessage');
+      const badgeEl = document.getElementById('smartConfirmBadge');
+      const barEl = document.getElementById('smartConfirmBar');
+      const iconWrap = document.getElementById('smartConfirmIconWrap');
+      const iconEl = document.getElementById('smartConfirmIcon');
+      const btnEl = document.getElementById('smartConfirmSubmitBtn');
+      const btnIconEl = document.getElementById('smartConfirmBtnIcon');
+      const btnTextEl = document.getElementById('smartConfirmBtnText');
+
+      titleEl.textContent = opts.title || 'Confirm Action';
+      msgEl.innerHTML = opts.message || 'Are you sure you want to proceed?';
+
+      if (opts.badge) {
+        badgeEl.textContent = opts.badge;
+        badgeEl.style.display = 'inline-block';
+      } else {
+        badgeEl.style.display = 'none';
+      }
+
+      const type = opts.type || 'danger';
+      if (type === 'danger') {
+        barEl.style.background = 'linear-gradient(90deg, #DC2626, #EF4444)';
+        iconWrap.style.background = '#FEE2E2';
+        iconWrap.style.color = '#DC2626';
+        iconWrap.style.boxShadow = '0 10px 25px -5px rgba(220, 38, 38, 0.25)';
+        iconEl.className = 'bi bi-trash3-fill';
+        btnEl.style.background = 'linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)';
+        btnIconEl.className = 'bi bi-trash3-fill';
+        btnTextEl.textContent = opts.btnText || 'Yes, Delete';
+      } else if (type === 'close' || type === 'success') {
+        barEl.style.background = 'linear-gradient(90deg, #10B981, #059669)';
+        iconWrap.style.background = '#D1FAE5';
+        iconWrap.style.color = '#059669';
+        iconWrap.style.boxShadow = '0 10px 25px -5px rgba(16, 185, 129, 0.25)';
+        iconEl.className = 'bi bi-check-circle-fill';
+        btnEl.style.background = 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
+        btnIconEl.className = 'bi bi-check2-circle';
+        btnTextEl.textContent = opts.btnText || 'Yes, Confirm';
+      }
+
+      // Check if another modal is currently open and temporarily hide it
+      const openModal = document.querySelector('.modal.show:not(#smartConfirmModal)');
+      if (openModal) {
+        modalEl.setAttribute('data-parent-modal', openModal.id);
+        const parentInstance = bootstrap.Modal.getInstance(openModal);
+        if (parentInstance) parentInstance.hide();
+      } else {
+        modalEl.removeAttribute('data-parent-modal');
+      }
+
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+    }
+
+    document.getElementById('smartConfirmSubmitBtn')?.addEventListener('click', function() {
+      if (pendingConfirmForm) {
+        const f = pendingConfirmForm;
+        pendingConfirmForm = null;
+        f.dataset.confirmed = 'true';
+        const modalEl = document.getElementById('smartConfirmModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        f.submit();
+      }
+    });
+
+    // If dismissed without submitting, restore any parent modal
+    document.getElementById('smartConfirmModal')?.addEventListener('hidden.bs.modal', function() {
+      if (!pendingConfirmForm) {
+        const parentId = this.getAttribute('data-parent-modal');
+        if (parentId) {
+          const parentEl = document.getElementById(parentId);
+          if (parentEl) {
+            this.removeAttribute('data-parent-modal');
+            bootstrap.Modal.getOrCreateInstance(parentEl).show();
+          }
+        }
+      }
+    });
+
+    // Global listener for forms with data-confirm
+    document.addEventListener('submit', function(e) {
+      const form = e.target;
+      const confirmMsg = form.getAttribute('data-confirm');
+      if (confirmMsg && !form.dataset.confirmed) {
+        e.preventDefault();
+        e.stopPropagation();
+        openSmartConfirm({
+          form: form,
+          title: form.getAttribute('data-confirm-title') || 'Confirm Action',
+          message: confirmMsg,
+          badge: form.getAttribute('data-confirm-badge') || '',
+          btnText: form.getAttribute('data-confirm-btn') || 'Confirm',
+          type: form.getAttribute('data-confirm-type') || 'danger'
+        });
+        return false;
+      }
+      delete form.dataset.confirmed;
+    }, true);
+  </script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>
