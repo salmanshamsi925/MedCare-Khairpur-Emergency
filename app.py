@@ -9,7 +9,11 @@ from pdf_generator import generate_cases_pdf, generate_single_case_pdf, generate
 
 app = Flask(__name__)
 app.secret_key = 'medcare-emergency-ht03-secret-key-2026'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///medcare_emergency.db'
+basedir = os.path.abspath(os.path.dirname(__file__))
+os.makedirs(os.path.join(basedir, 'instance'), exist_ok=True)
+db_path = os.path.join(basedir, 'instance', 'medcare_emergency.db').replace('\\', '/')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', f'sqlite:///{db_path}')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_PERMANENT'] = False
 
@@ -1022,6 +1026,12 @@ def seed_data():
 
 with app.app_context():
     db.create_all()
+    try:
+        with db.engine.connect() as _conn:
+            _conn.execute(db.text("ALTER TABLE [case] ADD COLUMN patient_phone VARCHAR(30)"))
+            _conn.commit()
+    except Exception:
+        pass
     seed_data()
 
 if __name__ == '__main__':
